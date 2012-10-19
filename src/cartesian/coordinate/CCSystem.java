@@ -93,7 +93,7 @@ public class CCSystem extends JPanel {
     private double xscale;
     private double yscale;
     
-    private Point2D.Double origo;
+    private Point2D.Double origin;
     
     /* Some private modifiers */
     private static final boolean DRAW_XAXIS = false;
@@ -178,7 +178,7 @@ public class CCSystem extends JPanel {
      * Draw a given axis, with or without unit lines.
      */
     private void drawAxis(Graphics2D g2d, boolean yaxis, boolean unitLines) {
-        Point o = translate(origo);
+        Point o = translate(origin);
         
         /* Draw the actual axes without any unit lines. */
         if (yaxis) g2d.drawLine(o.x, 0, o.x, getHeight());
@@ -230,8 +230,8 @@ public class CCSystem extends JPanel {
             String strval = Double.toString(val);
             
             Point2D.Double p2d;
-            if (yaxis) p2d = new Point2D.Double(origo.x, val);
-            else       p2d = new Point2D.Double(val, origo.y);
+            if (yaxis) p2d = new Point2D.Double(origin.x, val);
+            else       p2d = new Point2D.Double(val, origin.y);
             
             Point p = translate(p2d);
             
@@ -242,7 +242,7 @@ public class CCSystem extends JPanel {
             if (yaxis) offset = ywest ? -strValPixels : 5;
             else       offset = xsouth ? 20 : -10;
             
-            /* Don't draw the value at origo. */
+            /* Don't draw the value at origin. */
             if (val != 0.0 && yaxis) {
                 g2d.drawString(strval, p.x+offset, p.y+5);
             } else if (val != 0.0) {
@@ -469,17 +469,21 @@ public class CCSystem extends JPanel {
         
         yscale = distY / getHeight();
         
-        /* Find origo */
+        /* Find origin */
         double ox = 0;
         double oy = 0;
         
+        /* 
+         * Place origin along the edges of the screen if 
+         * (0, 0) is not in the visible area.
+         */
         if (loX >= 0) ox = loX;
         else if (hiX <= 0) ox = hiX;
         
         if (loY >= 0) oy = loY;
         else if (hiY <= 0) oy = hiY;
         
-        origo = new Point2D.Double(ox, oy);
+        origin = new Point2D.Double(ox, oy);
     }
     
     
