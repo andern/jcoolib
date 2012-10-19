@@ -292,17 +292,45 @@ public class CCSystem extends JPanel {
             p2d2 = new Point2D.Double(hiX, l.c*mul);
         /* Line with a defined non-zero slope. */
         } else {
+            /* 
+             * Possible intercept-pairs:
+             *  1. loX and loY
+             *  2. loX and hiY
+             *  3. loX and hiX
+             *  4. loY and hiX
+             *  5. loY and hiY
+             *  6. hiX and hiY
+             */
+            
             /* Find intercepts with the display window */
             double i_loX = l.solveForY(loX);
             double i_hiX = l.solveForY(hiX);
             double i_loY = l.solveForX(loY);
             double i_hiY = l.solveForX(hiY);
+            boolean v_loX = validY(i_loX);
+            boolean v_hiX = validY(i_hiX);
+            boolean v_loY = validX(i_loY);
+            boolean v_hiY = validX(i_hiY);
             
-            if (validY(i_loX)) p2d1 = new Point2D.Double(loX, i_loX);
-            else if (validX(i_loY)) p2d1 = new Point2D.Double(i_loY, loY);
-            
-            if (validY(i_hiX)) p2d2 = new Point2D.Double(hiX, i_hiX);
-            else if (validX(i_hiY)) p2d2 = new Point2D.Double(i_hiY, hiY);
+            if (v_loX && v_loY) {
+                p2d1 = new Point2D.Double(loX, i_loX);
+                p2d2 = new Point2D.Double(i_loY, loY);
+            } else if (v_loX && v_hiY) {
+                p2d1 = new Point2D.Double(loX, i_loX);
+                p2d2 = new Point2D.Double(i_hiY, hiY);
+            } else if (v_loX && v_hiX) {
+                p2d1 = new Point2D.Double(loX, i_loX);
+                p2d2 = new Point2D.Double(hiX, i_hiX);
+            } else if (v_loY && v_hiX) {
+                p2d1 = new Point2D.Double(i_loY, loY);
+                p2d2 = new Point2D.Double(hiX, i_hiX);
+            } else if (v_loY && v_hiY) {
+                p2d1 = new Point2D.Double(i_loY, loY);
+                p2d2 = new Point2D.Double(i_hiY, hiY);
+            } else if (v_hiX && v_hiY) {
+                p2d1 = new Point2D.Double(hiX, i_hiX);
+                p2d2 = new Point2D.Double(i_hiY, hiY);
+            }
         }
         if (p2d1 == null || p2d2 == null) return;
         
