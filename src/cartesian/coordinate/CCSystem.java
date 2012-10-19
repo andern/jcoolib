@@ -100,8 +100,8 @@ public class CCSystem extends JPanel {
     private static final boolean DRAW_YAXIS = true;
     
     /* Some listeners */
-    private MouseListener mouseListener = new mouseListener();
-    private MouseWheelListener mouseWheelListener = new mouseWheelListener();
+    private MouseListener mouseListener;
+    private MouseWheelListener mouseWheelListener;
     
     
     
@@ -125,6 +125,9 @@ public class CCSystem extends JPanel {
         lines = new ArrayList<Line>();
         
         /* Add some default listeners */
+        mouseListener = new mouseListener();
+        mouseWheelListener = new mouseWheelListener();
+        
         addMouseListener(mouseListener);
         addMouseMotionListener((MouseMotionListener) mouseListener);
         addMouseWheelListener(mouseWheelListener);
