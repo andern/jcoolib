@@ -73,13 +73,13 @@ public class CCSystem extends JPanel {
     /* End of visual options */
     
     /* Other options */
-    private boolean moveable;
+    private boolean movable;
     private boolean zoomable;
     
     /* Object containers */
     private ArrayList<Line> lines;
     
-    /* Define the range of the visibly xy-plane */
+    /* Define the range of the visible xy-plane */
     private double loX;
     private double hiX;
     private double loY;
@@ -99,6 +99,10 @@ public class CCSystem extends JPanel {
     private static final boolean DRAW_XAXIS = false;
     private static final boolean DRAW_YAXIS = true;
     
+    /* Some listeners */
+    private MouseListener mouseListener = new mouseListener();
+    private MouseWheelListener mouseWheelListener = new mouseWheelListener();
+    
     
     
     /**
@@ -112,7 +116,7 @@ public class CCSystem extends JPanel {
         drawYUnits = true;
         niceGraphics = true;
         zoomable = true;
-        moveable = true;
+        movable = true;
         loX = -10;
         hiX = 10;
         loY = -10;
@@ -121,9 +125,9 @@ public class CCSystem extends JPanel {
         lines = new ArrayList<Line>();
         
         /* Add some default listeners */
-        addMouseListener(new mouseListener());
-        addMouseMotionListener(new mouseListener());
-        addMouseWheelListener(new mouseScrollListener());
+        addMouseListener(mouseListener);
+        addMouseMotionListener((MouseMotionListener) mouseListener);
+        addMouseWheelListener(mouseWheelListener);
     }
     
     
@@ -383,9 +387,35 @@ public class CCSystem extends JPanel {
         drawAxes(g2d);
         for (Line line : lines) drawLine(g2d, line);
     }
-
-
-
+    
+    
+    
+    /**
+     * Set whether the coordinate system is movable with the mouse, i.e.
+     * the scope of the system changes as the the mouse is clicked, held
+     * and dragged over the system.
+     * 
+     * @param movable
+     *        If true, move is possible.
+     */
+    public void setMovable(boolean movable) {
+        if (this.movable && movable) return;
+        if (!this.movable && !movable) return;
+        
+        if (movable) {
+            addMouseListener(mouseListener);
+            addMouseMotionListener((MouseMotionListener) mouseListener);
+        }
+        else {
+            removeMouseListener(mouseListener);
+            removeMouseMotionListener((MouseMotionListener) mouseListener);
+        }
+        
+        movable = !movable;
+    }
+    
+    
+    
     /**
      * Turn on nice graphics.
      * <p>
@@ -429,6 +459,25 @@ public class CCSystem extends JPanel {
     
     
     
+    /**
+     * Set whether it is possible to zoom in/out in the coordinate
+     * system by scrolling the mouse wheel.
+     * 
+     * @param zoomable
+     *        If true, zoom is possible.
+     */
+    public void setZoomable(boolean zoomable) {
+        if (this.zoomable && zoomable) return;
+        if (!this.zoomable && !zoomable) return;
+        
+        if (zoomable) addMouseWheelListener(mouseWheelListener);
+        else removeMouseWheelListener(mouseWheelListener);
+        
+        zoomable = !zoomable;
+    }
+
+
+
     /*
      * Convert points from system 1 to system 2.
      */
@@ -517,12 +566,10 @@ public class CCSystem extends JPanel {
      * A {@code MouseWheelListener} making it possible to zoom in and out
      * of the coordinate system using the mouse wheel.
      */
-    class mouseScrollListener implements MouseWheelListener {
+    class mouseWheelListener implements MouseWheelListener {
 
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
-            if (!zoomable) return;
-
             int units = e.getUnitsToScroll();
 
             double distx = hiX - loX;
@@ -541,7 +588,7 @@ public class CCSystem extends JPanel {
     
     /**
      * A {@code MouseListener} making it possible to click and drag to move the
-     * position of the coordinaty system.
+     * position of the coordinate system.
      */
     class mouseListener implements MouseListener, MouseMotionListener {
         private int lastX;
@@ -568,9 +615,6 @@ public class CCSystem extends JPanel {
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            /* Don't move if we don't want to. */
-            if (!moveable) return;
-            
             int x = e.getX();
             int y = e.getY();
             
