@@ -30,6 +30,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JPanel;
 
 /**
@@ -57,8 +59,7 @@ public class CCSystem extends JPanel {
      * Throughout this class, Point is used to represent a point in system 1
      * while Point2D is used to represent a point in system 2.
      * 
-     * The methods translate(Point) and translate(Point2D) is used to translate
-     * between the two systems.
+     * The translate.*(.)-methods are used to translate between the two systems.
      */
     private static final long serialVersionUID = 1L;
     
@@ -77,12 +78,12 @@ public class CCSystem extends JPanel {
     private boolean zoomable;
     
     /* Object containers */
-    private ArrayList<Line> lines;
+    private List<Line> lines;
     
     /* Define the range of the visible xy-plane */
     private double minX;
-    private double maxX;
     private double minY;
+    private double maxX;
     private double maxY;
     
     /* The length of the domain of x and y */
@@ -108,7 +109,12 @@ public class CCSystem extends JPanel {
     /**
      * Initialize a new empty coordinate system.
      */
-    public CCSystem() {
+    public CCSystem(double minX, double minY, double maxX, double maxY) {
+        this.minX = minX;
+        this.minY = minY;
+        this.maxX = maxX;
+        this.maxY = maxY;
+
         /* Setting some default values. */
         drawXAxis = true;
         drawYAxis = true;;
@@ -117,11 +123,7 @@ public class CCSystem extends JPanel {
         niceGraphics = true;
         zoomable = true;
         movable = true;
-        minX = -10;
-        maxX = 10;
-        minY = -10;
-        maxY = 10;
-        
+
         lines = new ArrayList<Line>();
         
         /* Add some default listeners */
@@ -131,6 +133,12 @@ public class CCSystem extends JPanel {
         addMouseListener(mouseListener);
         addMouseMotionListener((MouseMotionListener) mouseListener);
         addMouseWheelListener(mouseWheelListener);
+    }
+    
+    
+    
+    public CCSystem() {
+        this(-10, -10, 10, 10);
     }
     
     
@@ -268,77 +276,92 @@ public class CCSystem extends JPanel {
     /*
      * Draw a Line.
      */
-    private void drawLine(Graphics2D g2d, Line l) {
-        Point2D.Double p2d1 = null;
-        Point2D.Double p2d2 = null;
-        /* Vertical line */
-        if (l.b == 0.0) {
-            int mul = (l.a < 0) ? -1 : 1;
-            
-            double xval = l.c*mul;
-            /* If the line is outside the visible area, don't draw it. */
-            if (xval < minX || xval > maxX) return;
-            
-            p2d1 = new Point2D.Double(xval, minY);
-            p2d2 = new Point2D.Double(xval, maxY);
-        /* Horizontal line */
-        } else if (l.a == 0.0) {
-            int mul = (l.a  < 0) ? -1 : 1;
-            double yval = l.c*mul;
-            
-            if (yval < minY || yval > maxY) return;
-            
-            p2d1 = new Point2D.Double(minX, l.c*mul);
-            p2d2 = new Point2D.Double(maxX, l.c*mul);
-        /* Line with a defined non-zero slope. */
+    private void drawLine(Graphics2D g2d, Line line) {
+        g2d.setPaint(line.paint);
+        if (line.b == 0.0) drawLineVertical(g2d, line);
+        else if (line.a == 0.0) drawLineHorizontal(g2d, line);
+        else drawLineSlope(g2d, line);
+    }
+    
+    
+    
+    /* 
+     * Draw a line with a defined slope.
+     * 
+     * Assume a, b != 0.
+     */
+    private void drawLineSlope(Graphics2D g2d, Line line) {
+        /* Find intercepts with the display window */
+        double i_minX = line.solveForY(minX);
+        double i_maxX = line.solveForY(maxX);
+        double i_minY = line.solveForX(minY);
+        double i_maxY = line.solveForX(maxY);
+        boolean v_minX = validY(i_minX);
+        boolean v_maxX = validY(i_maxX);
+        boolean v_minY = validX(i_minY);
+        boolean v_maxY = validX(i_maxY);
+        
+        /* 
+         * Possible intercept-pairs:
+         *  1. minX and minY        2. minX and maxY        3. minX and maxX
+         *  4. minY and maxX        5. minY and maxY        6. maxX and maxY
+         */
+        Point2D p2d1;
+        Point2D p2d2;
+        if (v_minX && v_minY) {
+            p2d1 = new Point2D.Double(minX, i_minX);
+            p2d2 = new Point2D.Double(i_minY, minY);
+        } else if (v_minX && v_maxY) {
+            p2d1 = new Point2D.Double(minX, i_minX);
+            p2d2 = new Point2D.Double(i_maxY, maxY);
+        } else if (v_minX && v_maxX) {
+            p2d1 = new Point2D.Double(minX, i_minX);
+            p2d2 = new Point2D.Double(maxX, i_maxX);
+        } else if (v_minY && v_maxX) {
+            p2d1 = new Point2D.Double(i_minY, minY);
+            p2d2 = new Point2D.Double(maxX, i_maxX);
+        } else if (v_minY && v_maxY) {
+            p2d1 = new Point2D.Double(i_minY, minY);
+            p2d2 = new Point2D.Double(i_maxY, maxY);
+        } else if (v_maxX && v_maxY) {
+            p2d1 = new Point2D.Double(maxX, i_maxX);
+            p2d2 = new Point2D.Double(i_maxY, maxY);
         } else {
-            /* 
-             * Possible intercept-pairs:
-             *  1. loX and loY
-             *  2. loX and hiY
-             *  3. loX and hiX
-             *  4. loY and hiX
-             *  5. loY and hiY
-             *  6. hiX and hiY
-             */
-            
-            /* Find intercepts with the display window */
-            double i_loX = l.solveForY(minX);
-            double i_hiX = l.solveForY(maxX);
-            double i_loY = l.solveForX(minY);
-            double i_hiY = l.solveForX(maxY);
-            boolean v_loX = validY(i_loX);
-            boolean v_hiX = validY(i_hiX);
-            boolean v_loY = validX(i_loY);
-            boolean v_hiY = validX(i_hiY);
-            
-            if (v_loX && v_loY) {
-                p2d1 = new Point2D.Double(minX, i_loX);
-                p2d2 = new Point2D.Double(i_loY, minY);
-            } else if (v_loX && v_hiY) {
-                p2d1 = new Point2D.Double(minX, i_loX);
-                p2d2 = new Point2D.Double(i_hiY, maxY);
-            } else if (v_loX && v_hiX) {
-                p2d1 = new Point2D.Double(minX, i_loX);
-                p2d2 = new Point2D.Double(maxX, i_hiX);
-            } else if (v_loY && v_hiX) {
-                p2d1 = new Point2D.Double(i_loY, minY);
-                p2d2 = new Point2D.Double(maxX, i_hiX);
-            } else if (v_loY && v_hiY) {
-                p2d1 = new Point2D.Double(i_loY, minY);
-                p2d2 = new Point2D.Double(i_hiY, maxY);
-            } else if (v_hiX && v_hiY) {
-                p2d1 = new Point2D.Double(maxX, i_hiX);
-                p2d2 = new Point2D.Double(i_hiY, maxY);
-            }
+            return;
         }
-        if (p2d1 == null || p2d2 == null) return;
         
         Point p1 = translate(p2d1);
         Point p2 = translate(p2d2);
         
-        g2d.setPaint(l.paint);
         g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
+    }
+    
+    
+    
+    /* Assume a == 0.0 */
+    private void drawLineHorizontal(Graphics2D g2d, Line line) {
+        int mul = (line.b  < 0) ? -1 : 1;
+        double yval = line.c*mul;
+        
+        int y = translateY(yval);
+        int x1 = translateX(minX);
+        int x2 = translateX(maxX);
+        
+        g2d.drawLine(x1, y, x2, y);
+    }
+    
+    
+    
+    /* Assume b == 0.0 */
+    private void drawLineVertical(Graphics2D g2d, Line line) {
+        int mul = (line.a < 0) ? -1 : 1;
+        double xval = line.c*mul;
+        
+        int x = translateX(xval);
+        int y1 = translateY(minY);
+        int y2 = translateY(maxY);
+        
+        g2d.drawLine(x, y1, x, y2);
     }
 
 
@@ -521,22 +544,35 @@ public class CCSystem extends JPanel {
     
     
     
-    private Point translate(Point2D.Double p2d) {
-        // TODO: Remove when done
-        if (p2d.x < minX || p2d.x > maxX || p2d.y < minY || p2d.y > maxY) {
-            try {
-                throw new Exception(p2d.toString());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        int x = (int) Math.round((p2d.x - minX) / xscale);
-        int y = (int) Math.round((p2d.y - minY) / yscale);
-        
-        /* Convert so that increasing y takes you north instead of south. */
-        y = getHeight() - y;
-        
-        return new Point(x, y);
+    /* Translate a given point from System 2 to System 1. */
+    private Point translate(Point2D p2d) {
+        return translate(p2d.getX(), p2d.getY());
+    }
+    
+    
+    
+    /* Translate the point (x, y) from System 2 to System 1. */
+    private Point translate(double x, double y) {
+        return new Point(translateX(x), translateY(y));
+    }
+    
+    
+    
+    /* Translate a single x-coordinate from System 2 to System 1. */
+    private int translateX(double x) {
+        return (int) Math.round((x - minX) / xscale);
+    }
+    
+    
+    
+    /* 
+     * Translate a single y-coordinate from System 2 to System 1.
+     * 
+     * Subtract from getHeight() since increasing y goes
+     * south in System 1 but north in System 2.
+     */
+    private int translateY(double y) {
+        return getHeight() - (int) Math.round((y - minY) / yscale);
     }
     
     
@@ -564,6 +600,18 @@ public class CCSystem extends JPanel {
         else if (maxY <= 0) oy = maxY;
         
         origin = new Point2D.Double(ox, oy);
+    }
+    
+    
+    
+    private boolean valid(double x, double y) {
+        return validX(x) && validY(y);
+    }
+    
+    
+    
+    private boolean valid(Point2D p2d) {
+        return valid(p2d.getX(), p2d.getY());
     }
     
     
