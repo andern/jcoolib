@@ -80,10 +80,10 @@ public class CCSystem extends JPanel {
     private ArrayList<Line> lines;
     
     /* Define the range of the visible xy-plane */
-    private double loX;
-    private double hiX;
-    private double loY;
-    private double hiY;
+    private double minX;
+    private double maxX;
+    private double minY;
+    private double maxY;
     
     /* The length of the domain of x and y */
     private double distX;
@@ -117,10 +117,10 @@ public class CCSystem extends JPanel {
         niceGraphics = true;
         zoomable = true;
         movable = true;
-        loX = -10;
-        hiX = 10;
-        loY = -10;
-        hiY = 10;
+        minX = -10;
+        maxX = 10;
+        minY = -10;
+        maxY = 10;
         
         lines = new ArrayList<Line>();
         
@@ -159,10 +159,10 @@ public class CCSystem extends JPanel {
     
     /* Move the visible area relevant to the current position. */ 
     private void drag(double moveX, double moveY) {
-        loX += moveX;
-        hiX += moveX;
-        loY += moveY;
-        hiY += moveY;
+        minX += moveX;
+        maxX += moveX;
+        minY += moveY;
+        maxY += moveY;
     }
     
     
@@ -195,8 +195,8 @@ public class CCSystem extends JPanel {
         if (!unitLines) return;
     
         /* Find position for the unit line values. */
-        boolean ywest = (loX >= 0) ? false : true;
-        boolean xsouth = (loY >= 0) ? false : true;
+        boolean ywest = (minX >= 0) ? false : true;
+        boolean xsouth = (minY >= 0) ? false : true;
         
         /* Approximate number of pixels between each unit line. */
         int pbu = 65;
@@ -224,13 +224,13 @@ public class CCSystem extends JPanel {
          * visible unit line.
          */
         int i;
-        if (yaxis) i = (int) Math.ceil(loY / vbu); 
-        else       i = (int) Math.ceil(loX / vbu);
+        if (yaxis) i = (int) Math.ceil(minY / vbu); 
+        else       i = (int) Math.ceil(minX / vbu);
         
         /* Also find the value at the last visible unit line. */
         int end;
-        if (yaxis) end = (int) Math.floor(hiY / vbu);
-        else       end = (int) Math.floor(hiX / vbu);
+        if (yaxis) end = (int) Math.floor(maxY / vbu);
+        else       end = (int) Math.floor(maxX / vbu);
         
         for (; i <= end; i++) {
             double val = i * vbu;
@@ -277,19 +277,19 @@ public class CCSystem extends JPanel {
             
             double xval = l.c*mul;
             /* If the line is outside the visible area, don't draw it. */
-            if (xval < loX || xval > hiX) return;
+            if (xval < minX || xval > maxX) return;
             
-            p2d1 = new Point2D.Double(xval, loY);
-            p2d2 = new Point2D.Double(xval, hiY);
+            p2d1 = new Point2D.Double(xval, minY);
+            p2d2 = new Point2D.Double(xval, maxY);
         /* Horizontal line */
         } else if (l.a == 0.0) {
             int mul = (l.a  < 0) ? -1 : 1;
             double yval = l.c*mul;
             
-            if (yval < loY || yval > hiY) return;
+            if (yval < minY || yval > maxY) return;
             
-            p2d1 = new Point2D.Double(loX, l.c*mul);
-            p2d2 = new Point2D.Double(hiX, l.c*mul);
+            p2d1 = new Point2D.Double(minX, l.c*mul);
+            p2d2 = new Point2D.Double(maxX, l.c*mul);
         /* Line with a defined non-zero slope. */
         } else {
             /* 
@@ -303,33 +303,33 @@ public class CCSystem extends JPanel {
              */
             
             /* Find intercepts with the display window */
-            double i_loX = l.solveForY(loX);
-            double i_hiX = l.solveForY(hiX);
-            double i_loY = l.solveForX(loY);
-            double i_hiY = l.solveForX(hiY);
+            double i_loX = l.solveForY(minX);
+            double i_hiX = l.solveForY(maxX);
+            double i_loY = l.solveForX(minY);
+            double i_hiY = l.solveForX(maxY);
             boolean v_loX = validY(i_loX);
             boolean v_hiX = validY(i_hiX);
             boolean v_loY = validX(i_loY);
             boolean v_hiY = validX(i_hiY);
             
             if (v_loX && v_loY) {
-                p2d1 = new Point2D.Double(loX, i_loX);
-                p2d2 = new Point2D.Double(i_loY, loY);
+                p2d1 = new Point2D.Double(minX, i_loX);
+                p2d2 = new Point2D.Double(i_loY, minY);
             } else if (v_loX && v_hiY) {
-                p2d1 = new Point2D.Double(loX, i_loX);
-                p2d2 = new Point2D.Double(i_hiY, hiY);
+                p2d1 = new Point2D.Double(minX, i_loX);
+                p2d2 = new Point2D.Double(i_hiY, maxY);
             } else if (v_loX && v_hiX) {
-                p2d1 = new Point2D.Double(loX, i_loX);
-                p2d2 = new Point2D.Double(hiX, i_hiX);
+                p2d1 = new Point2D.Double(minX, i_loX);
+                p2d2 = new Point2D.Double(maxX, i_hiX);
             } else if (v_loY && v_hiX) {
-                p2d1 = new Point2D.Double(i_loY, loY);
-                p2d2 = new Point2D.Double(hiX, i_hiX);
+                p2d1 = new Point2D.Double(i_loY, minY);
+                p2d2 = new Point2D.Double(maxX, i_hiX);
             } else if (v_loY && v_hiY) {
-                p2d1 = new Point2D.Double(i_loY, loY);
-                p2d2 = new Point2D.Double(i_hiY, hiY);
+                p2d1 = new Point2D.Double(i_loY, minY);
+                p2d2 = new Point2D.Double(i_hiY, maxY);
             } else if (v_hiX && v_hiY) {
-                p2d1 = new Point2D.Double(hiX, i_hiX);
-                p2d2 = new Point2D.Double(i_hiY, hiY);
+                p2d1 = new Point2D.Double(maxX, i_hiX);
+                p2d2 = new Point2D.Double(i_hiY, maxY);
             }
         }
         if (p2d1 == null || p2d2 == null) return;
@@ -399,10 +399,10 @@ public class CCSystem extends JPanel {
      *        Highest visible value of y.
      */
     public void move(double loX, double hiX, double loY, double hiY) {
-        this.loX = loX;
-        this.hiX = hiX;
-        this.loY = loY;
-        this.hiY = hiY;
+        this.minX = loX;
+        this.maxX = hiX;
+        this.minY = loY;
+        this.maxY = hiY;
     }
     
     
@@ -513,8 +513,8 @@ public class CCSystem extends JPanel {
      * Convert points from system 1 to system 2.
      */
     private Point2D.Double translate(Point p) {
-        double x = p.x * xscale + loX;
-        double y = p.y * yscale + loY;
+        double x = p.x * xscale + minX;
+        double y = p.y * yscale + minY;
 
         return new Point2D.Double(x, y);
     }
@@ -523,15 +523,15 @@ public class CCSystem extends JPanel {
     
     private Point translate(Point2D.Double p2d) {
         // TODO: Remove when done
-        if (p2d.x < loX || p2d.x > hiX || p2d.y < loY || p2d.y > hiY) {
+        if (p2d.x < minX || p2d.x > maxX || p2d.y < minY || p2d.y > maxY) {
             try {
                 throw new Exception(p2d.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        int x = (int) Math.round((p2d.x - loX) / xscale);
-        int y = (int) Math.round((p2d.y - loY) / yscale);
+        int x = (int) Math.round((p2d.x - minX) / xscale);
+        int y = (int) Math.round((p2d.y - minY) / yscale);
         
         /* Convert so that increasing y takes you north instead of south. */
         y = getHeight() - y;
@@ -542,8 +542,8 @@ public class CCSystem extends JPanel {
     
     
     private void updatePosition() {
-        distX = hiX - loX;
-        distY = hiY - loY;
+        distX = maxX - minX;
+        distY = maxY - minY;
         
         xscale = distX / getWidth();
         
@@ -557,11 +557,11 @@ public class CCSystem extends JPanel {
          * Place origin along the edges of the screen if 
          * (0, 0) is not in the visible area.
          */
-        if (loX >= 0) ox = loX;
-        else if (hiX <= 0) ox = hiX;
+        if (minX >= 0) ox = minX;
+        else if (maxX <= 0) ox = maxX;
         
-        if (loY >= 0) oy = loY;
-        else if (hiY <= 0) oy = hiY;
+        if (minY >= 0) oy = minY;
+        else if (maxY <= 0) oy = maxY;
         
         origin = new Point2D.Double(ox, oy);
     }
@@ -569,13 +569,13 @@ public class CCSystem extends JPanel {
     
     
     private boolean validX(double x) {
-        return (x >= loX && x <= hiX);
+        return (x >= minX && x <= maxX);
     }
     
     
     
     private boolean validY(double y) {
-        return (y >= loY && y <= hiY);
+        return (y >= minY && y <= maxY);
     }
     
     
@@ -585,10 +585,10 @@ public class CCSystem extends JPanel {
      * position by keeping the center the same.
      */
     private void zoom(double zoomX, double zoomY) {
-        loX -= zoomX;
-        hiX += zoomX;
-        loY -= zoomY;
-        hiY += zoomY;
+        minX -= zoomX;
+        maxX += zoomX;
+        minY -= zoomY;
+        maxY += zoomY;
     }
     
     
@@ -603,8 +603,8 @@ public class CCSystem extends JPanel {
         public void mouseWheelMoved(MouseWheelEvent e) {
             int units = e.getUnitsToScroll();
 
-            double distx = hiX - loX;
-            double disty = hiY - loY;
+            double distx = maxX - minX;
+            double disty = maxY - minY;
 
             double zoomx = distx / 100.0 * units;
             double zoomy = disty / 100.0 * units;
