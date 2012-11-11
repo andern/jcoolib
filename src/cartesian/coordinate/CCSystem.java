@@ -18,6 +18,7 @@
  */
 package cartesian.coordinate;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -96,8 +97,26 @@ public class CCSystem extends JPanel {
     
     /* The distance between each unit line, in pixels */
     private int ulScale;
-    /* The size of each unit line, in pixels. */
+    
+    /* The size of each unit line, in pixels */
     private int ulSize;
+    
+    /* Total number of units on the axes */
+    private double unitsX;
+    private double unitsY;
+    
+    /* Exact value between each unit line on the axes */
+    private double udistX;
+    private double udistY;
+    
+    /* 
+     * Round this exact value to a value (of the same magnitude) that can be
+     * written with very few decimals (or lots of trailing zeroes.)
+     * 
+     * vbu stands for "value between unit lines"
+     */
+    double vbuX;
+    double vbuY;
     
     /* The origin of system 1 and system 2 */
     private Point2D.Double origin2d;
@@ -189,100 +208,12 @@ public class CCSystem extends JPanel {
      */
     public void drawAxes(Graphics2D g2d) {
         g2d.setColor(Color.black);
-        if (drawXAxis) g2d.drawLine(origin.x, 0, origin.x, getHeight());
-        if (drawYAxis) g2d.drawLine(0, origin.y, getWidth(), origin.y);
         if (drawXUnits) drawXUnitLines(g2d);
         if (drawYUnits) drawYUnitLines(g2d);
-    }
-    
-    
-    
-    /* Draw all the unit lines on the x-axis. */
-    private void drawXUnitLines(Graphics2D g2d) {
-        /* Total number of units on the axis */
-        double units = getWidth() / ulScale;
         
-        /* Exact value between each unit line */
-        double udist = distX / units;
-        
-        /* 
-         * Round this exact value to a value (of the same magnitude) that can be
-         * written with very few decimals (or lots of trailing zeroes.)
-         */
-        double vbu = findScale(udist);
-        drawXUnitLines(g2d, vbu);
-    }
-
-
-
-    /* Draw the unit lines on the x-axis with a specific value between them. */
-    private void drawXUnitLines(Graphics2D g2d, double vbu) {
-        /* 
-         * The value at each unit line will now be defined as i * vbu. We need
-         * to find the value of i such that i * vbu is the value at the first
-         * visible unit line.
-         */
-        int i = (int) Math.ceil(minX / vbu);
-        
-        /* Also find the value of the last visible unit line. */
-        int end = (int) Math.floor(maxX / vbu);
-        
-        for (; i <= end; i++) drawXUnitLine(g2d, i*vbu);
-    }
-
-
-
-    /* Draw a single unit line on the x-axis at a given value. */
-    private void drawXUnitLine(Graphics2D g2d, double val) {
-        /* Don't draw anything at the origin. */
-        if (val == 0.0) return;
-        String strval = Double.toString(val);
-        
-        Point2D.Double p2d = new Point2D.Double(val, origin2d.y);
-        Point p = translate(p2d);
-        
-        int strValPixels = 7 * strval.length();
-        int offset = (minY >= 0) ? -10 : 20;
-        
-        g2d.drawLine(p.x, p.y-ulSize, p.x, p.y+ulSize);
-        g2d.drawString(strval, p.x - strValPixels/2, p.y + offset);
-    }
-
-
-
-    /* Draw a single unit line on the y-axis at a given value. */
-    private void drawYUnitLines(Graphics2D g2d) {
-        double units = getHeight() / ulScale;
-        double udist = distY / units;
-        double vbu = findScale(udist);
-        drawYUnitLines(g2d, vbu);
-    }
-
-
-
-    /* Draw the unit lines on the x-axis with a specific value between them. */
-    private void drawYUnitLines(Graphics2D g2d, double vbu) {
-        int i = (int) Math.ceil(minY / vbu);
-        int end = (int) Math.floor(maxY / vbu);
-        
-        for (; i <= end; i++) drawYUnitLine(g2d, i*vbu);
-    }
-
-
-
-    /* Draw a single unit line on the y-axis at a given value. */
-    private void drawYUnitLine(Graphics2D g2d, double val) {
-        if (val == 0.0) return;
-        String strval = Double.toString(val);
-        
-        Point2D.Double p2d = new Point2D.Double(origin2d.x, val);
-        Point p = translate(p2d);
-        
-        int strValPixels = 7 * strval.length();
-        int offset = (minX >= 0) ? 5 : -strValPixels;
-        
-        g2d.drawLine(p.x-ulSize, p.y, p.x+ulSize, p.y);
-        g2d.drawString(strval, p.x+offset, p.y+5);
+        g2d.setStroke(new BasicStroke(1.3f));
+        if (drawXAxis) g2d.drawLine(origin.x, 0, origin.x, getHeight());
+        if (drawYAxis) g2d.drawLine(0, origin.y, getWidth(), origin.y);
     }
 
 
@@ -296,9 +227,25 @@ public class CCSystem extends JPanel {
         else if (line.a == 0.0) drawLineHorizontal(g2d, line);
         else drawLineSlope(g2d, line);
     }
-    
-    
-    
+
+
+
+    /* Assume a == 0.0 */
+    private void drawLineHorizontal(Graphics2D g2d, Line line) {
+        int mul = (line.b  < 0) ? -1 : 1;
+        double yval = line.c*mul;
+        
+        int y = translateY(yval);
+        if (!validY(y)) return; /* Don't draw lines off the screen. */
+        
+        int x1 = translateX(minX);
+        int x2 = translateX(maxX);
+        
+        g2d.drawLine(x1, y, x2, y);
+    }
+
+
+
     /* 
      * Draw a line with a defined slope.
      * 
@@ -341,7 +288,7 @@ public class CCSystem extends JPanel {
             p2d1 = new Point2D.Double(maxX, i_maxX);
             p2d2 = new Point2D.Double(i_maxY, maxY);
         } else {
-            return;
+            return; /* Don't draw lines off the screen. */
         }
         
         Point p1 = translate(p2d1);
@@ -349,33 +296,83 @@ public class CCSystem extends JPanel {
         
         g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
     }
-    
-    
-    
-    /* Assume a == 0.0 */
-    private void drawLineHorizontal(Graphics2D g2d, Line line) {
-        int mul = (line.b  < 0) ? -1 : 1;
-        double yval = line.c*mul;
-        
-        int y = translateY(yval);
-        int x1 = translateX(minX);
-        int x2 = translateX(maxX);
-        
-        g2d.drawLine(x1, y, x2, y);
-    }
-    
-    
-    
+
+
+
     /* Assume b == 0.0 */
     private void drawLineVertical(Graphics2D g2d, Line line) {
         int mul = (line.a < 0) ? -1 : 1;
         double xval = line.c*mul;
         
         int x = translateX(xval);
+        if (!validX(x)) return; /* Don't draw lines off the screen. */
+        
         int y1 = translateY(minY);
         int y2 = translateY(maxY);
         
         g2d.drawLine(x, y1, x, y2);
+    }
+
+
+
+    /* Draw a single unit line on the x-axis at a given value. */
+    private void drawXUnitLine(Graphics2D g2d, double val) {
+        /* Don't draw anything at the origin. */
+        if (val == 0.0) return;
+        String strval = Double.toString(val);
+        
+        Point2D.Double p2d = new Point2D.Double(val, origin2d.y);
+        Point p = translate(p2d);
+        
+        int strValPixels = 7 * strval.length();
+        int offset = (minY >= 0) ? -10 : 20;
+        
+        g2d.drawLine(p.x, p.y-ulSize, p.x, p.y+ulSize);
+        g2d.drawString(strval, p.x - strValPixels/2, p.y + offset);
+    }
+
+
+
+    /* Draw all the unit lines on the x-axis. */ 
+    private void drawXUnitLines(Graphics2D g2d) {
+        /* 
+         * The value at each unit line will now be defined as i * vbuX. We need
+         * to find the value of i such that i * vbuX is the value at the first
+         * visible unit line.
+         */
+        int idx = (int) Math.ceil(minX / vbuX);
+        
+        /* Also find the value of the last visible unit line. */
+        int end = (int) Math.floor(maxX / vbuX);
+        
+        for (int i = idx; i <= end; i++) drawXUnitLine(g2d, i*vbuX);
+    }
+
+
+
+    /* Draw a single unit line on the y-axis at a given value. */
+    private void drawYUnitLine(Graphics2D g2d, double val) {
+        if (val == 0.0) return;
+        String strval = Double.toString(val);
+        
+        Point2D.Double p2d = new Point2D.Double(origin2d.x, val);
+        Point p = translate(p2d);
+        
+        int strValPixels = 7 * strval.length();
+        int offset = (minX >= 0) ? 5 : -strValPixels;
+        
+        g2d.drawLine(p.x-ulSize, p.y, p.x+ulSize, p.y);
+        g2d.drawString(strval, p.x+offset, p.y+5);
+    }
+
+
+
+    /* Draw all the unit lines on the x-axis. */ 
+    private void drawYUnitLines(Graphics2D g2d) {
+        int i = (int) Math.ceil(minY / vbuY);
+        int end = (int) Math.floor(maxY / vbuY);
+        
+        for (; i <= end; i++) drawYUnitLine(g2d, i*vbuY);
     }
 
 
@@ -597,8 +594,18 @@ public class CCSystem extends JPanel {
         distY = maxY - minY;
         
         xscale = distX / getWidth();
-        
         yscale = distY / getHeight();
+        
+        /* Total number of units on the axis */
+        unitsX = getWidth() / ulScale;
+        unitsY = getHeight() / ulScale;
+        
+        /* Exact value between each unit line */
+        udistX = distX / unitsX;
+        udistY = distY / unitsY;
+        
+        vbuX = findScale(udistX);
+        vbuY = findScale(udistY);
         
         /* Find origin */
         double ox = 0;
