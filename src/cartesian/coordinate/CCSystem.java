@@ -115,8 +115,8 @@ public class CCSystem extends JPanel {
      * 
      * vbu stands for "value between unit lines"
      */
-    double vbuX;
-    double vbuY;
+    private double vbuX;
+    private double vbuY;
     
     /* The origin of system 1 and system 2 */
     private Point2D.Double origin2d;
