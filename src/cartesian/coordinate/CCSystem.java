@@ -215,6 +215,64 @@ public class CCSystem extends JPanel {
         if (drawXAxis) g2d.drawLine(origin.x, 0, origin.x, getHeight());
         if (drawYAxis) g2d.drawLine(0, origin.y, getWidth(), origin.y);
     }
+    
+    
+    
+    /**
+     * Draw a thin grid for the coordinate system.
+     * 
+     * @param g2d
+     *        A {@code Graphics2D} object.
+     */
+    public void drawGrid(Graphics2D g2d) {
+        g2d.setColor(Color.black);
+        g2d.setStroke(new BasicStroke(0.1f));
+        
+        drawXGridLines(g2d);
+        drawYGridLines(g2d);
+    }
+    
+    
+    
+    /* Draw one vertical grid line. */
+    private void drawXGridLine(Graphics2D g2d, double val) {
+        int x = translateX(val);
+        int y1 = translateY(minY);
+        int y2 = translateY(maxY);
+        g2d.drawLine(x, y1, x, y2);
+    }
+    
+    
+    
+    /* Draw vertical grid lines. */
+    private void drawXGridLines(Graphics2D g2d) {
+        double vbu = this.vbuX / 5;
+        
+        int idx = (int) Math.ceil(minX / vbu);
+        int end = (int) Math.floor(maxX / vbu);
+        
+        for (int i = idx; i <= end; i++) drawXGridLine(g2d, i*vbu);
+    }
+    
+    
+    /* Draw one horizontal grid line. */
+    private void drawYGridLine(Graphics2D g2d, double val) {
+        int y = translateY(val);
+        int x1 = translateX(minX);
+        int x2 = translateX(maxX);
+        g2d.drawLine(x1, y, x2, y);
+    }
+    
+    
+    /* Draw horizontal grid lines. */
+    private void drawYGridLines(Graphics2D g2d) {
+        double vbu = this.vbuY / 5;
+        
+        int idx = (int) Math.ceil(minY / vbu);
+        int end = (int) Math.floor(maxY / vbu);
+        
+        for (int i = idx; i <= end; i++) drawYGridLine(g2d, i*vbu);
+    }
 
 
 
@@ -450,6 +508,9 @@ public class CCSystem extends JPanel {
         if (niceGraphics) g2d.addRenderingHints(getNiceGraphics());
         
         drawAxes(g2d);
+        drawGrid(g2d);
+        
+        g2d.setStroke(new BasicStroke(1f));
         
         for (Line line : lines) drawLine(g2d, line);
     }
