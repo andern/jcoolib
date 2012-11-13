@@ -18,7 +18,10 @@
  */
 package cartesian.coordinate;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Paint;
+import java.awt.Stroke;
 
 /**
  * {@code Line} represents a straight line in a Cartesian coordinate system.
@@ -36,6 +39,44 @@ public class Line {
     protected double b;
     protected double c;
     protected Paint paint;
+    protected Stroke stroke;
+    
+    
+    
+    /**
+     * Create a new line from a linear equation in slope-intercept form:
+     * <pre>
+     *     y = mx + b
+     * </pre>
+     * 
+     * @param m
+     *        The slope of the line.
+     * @param b
+     *        y-intercept; the y-coordinate of the location where the line
+     *        crosses the y axis.
+     */
+    public Line(double m, double b) {
+        this(-m, 1, b);
+    }
+
+
+
+    /**
+     * Create a new line from a linear equation in general form:
+     * <pre>
+     *     ax + by = c
+     * </pre>
+     * 
+     * @param a
+     *        Coefficient of the x-variable.
+     * @param b
+     *        Coefficient of the y-variable.
+     * @param c
+     *        A constant.
+     */
+    public Line(double a, double b, double c) {
+        this(a, b, c, Color.black, new BasicStroke(1f));
+    }
     
     
     
@@ -55,10 +96,7 @@ public class Line {
      *        Draw the line using this paint.
      */
     public Line(double a, double b, double c, Paint paint) {
-        this.a = a;
-        this.b = b;
-        this.c = c;
-        this.paint = paint;
+        this(a, b, c, paint, new BasicStroke(1f));
     }
     
     
@@ -79,6 +117,55 @@ public class Line {
      */
     public Line(double m, double b, Paint paint) {
         this(-m, 1, b, paint);
+    }
+
+
+
+    /**
+     * Create a new line from a linear equation in general form:
+     * <pre>
+     *     ax + by = c
+     * </pre>
+     * 
+     * @param a
+     *        Coefficient of the x-variable.
+     * @param b
+     *        Coefficient of the y-variable.
+     * @param c
+     *        A constant.
+     * @param paint
+     *        Draw the line using this paint.
+     * @param stroke
+     *        Draw the line using this stroke.
+     */
+    public Line(double a, double b, double c, Paint paint, Stroke stroke) {
+        this.a = a;
+        this.b = b;
+        this.c = c;
+        this.paint = paint;
+        this.stroke = stroke;
+    }
+    
+    
+    
+    /**
+     * Create a new line from a linear equation in slope-intercept form:
+     * <pre>
+     *     y = mx + b
+     * </pre>
+     * 
+     * @param m
+     *        The slope of the line.
+     * @param b
+     *        y-intercept; the y-coordinate of the location where the line
+     *        crosses the y axis.
+     * @param paint
+     *        Draw the line using this paint.
+     * @param stroke
+     *        Draw the line using this stroke.
+     */
+    public Line(double m, double b, Paint paint, Stroke stroke) {
+        this(-m, 1, b, paint, stroke);
     }
     
     

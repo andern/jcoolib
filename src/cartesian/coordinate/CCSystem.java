@@ -22,8 +22,10 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -67,6 +69,9 @@ public class CCSystem extends JPanel {
     /* Some visual options */
     private boolean drawXAxis;
     private boolean drawYAxis;
+    
+    private boolean drawXGrid;
+    private boolean drawYGrid;
     
     private boolean drawXUnits;
     private boolean drawYUnits;
@@ -139,7 +144,9 @@ public class CCSystem extends JPanel {
 
         /* Setting some default values. */
         drawXAxis = true;
-        drawYAxis = true;;
+        drawYAxis = true;
+        drawXGrid = true;
+        drawYGrid = true;
         drawXUnits = true; // Unit lines are only drawn if the axes are drawn.
         drawYUnits = true;
         niceGraphics = true;
@@ -228,8 +235,8 @@ public class CCSystem extends JPanel {
         g2d.setColor(Color.black);
         g2d.setStroke(new BasicStroke(0.1f));
         
-        drawXGridLines(g2d);
-        drawYGridLines(g2d);
+        if (drawXGrid) drawXGridLines(g2d);
+        if (drawYGrid) drawYGridLines(g2d);
     }
     
     
@@ -244,13 +251,32 @@ public class CCSystem extends JPanel {
     
     
     
-    /* Draw vertical grid lines. */
+    /*
+     * Draw vertical grid lines using default settings.
+     * 
+     * The default is drawing 5 0.1 thick lines for every unit line
+     * using gray paint.
+     */
     private void drawXGridLines(Graphics2D g2d) {
-        double vbu = this.vbuX / 5;
+        drawXGridLines(g2d, 5, new BasicStroke(0.5f), Color.gray);
+    }
+    
+    
+    
+    /*
+     * Draw vertical grid lines a give amount of  times between each unit line.
+     * 
+     * Use the given stroke and paint to draw the grid lines.
+     */
+    private void drawXGridLines(Graphics2D g2d, double ratio,
+                               Stroke stroke, Paint paint) {
+        double vbu = this.vbuX / ratio;
         
         int idx = (int) Math.ceil(minX / vbu);
         int end = (int) Math.floor(maxX / vbu);
         
+        g2d.setStroke(stroke);
+        g2d.setPaint(paint);
         for (int i = idx; i <= end; i++) drawXGridLine(g2d, i*vbu);
     }
     
@@ -264,13 +290,33 @@ public class CCSystem extends JPanel {
     }
     
     
-    /* Draw horizontal grid lines. */
+    
+    /*
+     * Draw horizontal grid lines using default settings.
+     * 
+     * The default is drawing 5 0.1f thick lines for every unit line
+     * using gray paint.
+     */
     private void drawYGridLines(Graphics2D g2d) {
-        double vbu = this.vbuY / 5;
+        drawYGridLines(g2d, 5, new BasicStroke(0.5f), Color.gray);
+    }
+    
+    
+    
+    /*
+     * Draw horizontal grid lines {@code ratio} times between each unit line.
+     * 
+     * Use the given stroke and paint to draw the grid lines. 
+     */
+    private void drawYGridLines(Graphics2D g2d, double ratio,
+                               Stroke stroke, Paint paint) {
+        double vbu = this.vbuY / ratio;
         
         int idx = (int) Math.ceil(minY / vbu);
         int end = (int) Math.floor(maxY / vbu);
         
+        g2d.setStroke(stroke);
+        g2d.setPaint(paint);
         for (int i = idx; i <= end; i++) drawYGridLine(g2d, i*vbu);
     }
 
@@ -281,6 +327,7 @@ public class CCSystem extends JPanel {
      */
     private void drawLine(Graphics2D g2d, Line line) {
         g2d.setPaint(line.paint);
+        g2d.setStroke(line.stroke);
         if (line.b == 0.0) drawLineVertical(g2d, line);
         else if (line.a == 0.0) drawLineHorizontal(g2d, line);
         else drawLineSlope(g2d, line);
@@ -579,6 +626,21 @@ public class CCSystem extends JPanel {
     
     
     
+    /**
+     * @param visible
+     *        If true, draw a grid.
+     */
+    public void setVisibleGrid(boolean visible) {
+        drawXGrid = visible;
+        drawYGrid = visible;
+    }
+    
+    
+    
+    /**
+     * @param visible
+     *        If true, draw unit lines.
+     */
     public void setVisibleUnitLines(boolean visible) {
         drawXUnits = visible;
         drawYUnits = visible;
