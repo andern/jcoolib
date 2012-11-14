@@ -67,17 +67,28 @@ public class CCSystem extends JPanel {
     private static final long serialVersionUID = 1L;
     
     /* Some visual options */
-    private boolean drawXAxis;
-    private boolean drawYAxis;
+    private boolean axisXVisible;
+    private boolean axisYVisible;
+    private boolean gridXVisible;
+    private boolean gridYVisible;
+    private boolean unitXVisible;
+    private boolean unitYVisible;
     
-    private boolean drawXGrid;
-    private boolean drawYGrid;
+    private Paint axisXPaint;
+    private Paint axisYPaint;
+    private Paint gridXPaint;
+    private Paint gridYPaint;
     
-    private boolean drawXUnits;
-    private boolean drawYUnits;
+    private Stroke axisXStroke;
+    private Stroke axisYStroke;
+    private Stroke gridXStroke;
+    private Stroke gridYStroke;
     
     private boolean niceGraphics;
     /* End of visual options */
+    
+    /* The number of grid lines between each unit line */
+    private double gridRatio;
     
     /* Other options */
     private boolean movable;
@@ -143,12 +154,24 @@ public class CCSystem extends JPanel {
         this.maxY = maxY;
 
         /* Setting some default values. */
-        drawXAxis = true;
-        drawYAxis = true;
-        drawXGrid = true;
-        drawYGrid = true;
-        drawXUnits = true; // Unit lines are only drawn if the axes are drawn.
-        drawYUnits = true;
+        axisXVisible = true;
+        axisYVisible = true;
+        gridXVisible = true;
+        gridYVisible = true;
+        unitXVisible = true;
+        unitYVisible = true;
+        
+        axisXPaint = Color.black;
+        axisYPaint = Color.black;
+        gridXPaint = Color.gray;
+        gridYPaint = Color.gray;
+        
+        axisXStroke = new BasicStroke(1.3f);
+        axisYStroke = new BasicStroke(1.3f);
+        gridXStroke = new BasicStroke(0.1f);
+        gridYStroke = new BasicStroke(0.1f);
+        
+        gridRatio = 5;
         niceGraphics = true;
         zoomable = true;
         movable = true;
@@ -206,37 +229,36 @@ public class CCSystem extends JPanel {
     
     
     
-    /**
+    /*
      * Draw the axes and unit lines in the best looking way possible for the
      * given x- and y-ranges.
-     * 
-     * @param g2d
-     *        A {@code Graphics2D} object.
      */
-    public void drawAxes(Graphics2D g2d) {
-        g2d.setColor(Color.black);
-        if (drawXUnits) drawXUnitLines(g2d);
-        if (drawYUnits) drawYUnitLines(g2d);
-        
-        g2d.setStroke(new BasicStroke(1.3f));
-        if (drawXAxis) g2d.drawLine(origin.x, 0, origin.x, getHeight());
-        if (drawYAxis) g2d.drawLine(0, origin.y, getWidth(), origin.y);
+    private void drawAxes(Graphics2D g2d) {
+        if (axisXVisible) {
+            g2d.setPaint(axisXPaint);
+            g2d.setStroke(axisXStroke);
+            if (unitXVisible) drawXUnitLines(g2d);
+            g2d.drawLine(origin.x, 0, origin.x, getHeight());
+        }
+        if (axisYVisible) {
+            g2d.setPaint(axisYPaint);
+            g2d.setStroke(axisYStroke);
+            if (unitYVisible) drawYUnitLines(g2d);
+            g2d.drawLine(0, origin.y, getWidth(), origin.y);
+        }
     }
     
     
     
-    /**
-     * Draw a thin grid for the coordinate system.
-     * 
-     * @param g2d
-     *        A {@code Graphics2D} object.
+    /*
+     * Draw a grid for the coordinate system.
      */
-    public void drawGrid(Graphics2D g2d) {
+    private void drawGrid(Graphics2D g2d) {
         g2d.setColor(Color.black);
         g2d.setStroke(new BasicStroke(0.1f));
         
-        if (drawXGrid) drawXGridLines(g2d);
-        if (drawYGrid) drawYGridLines(g2d);
+        if (gridXVisible) drawXGridLines(g2d);
+        if (gridYVisible) drawYGridLines(g2d);
     }
     
     
@@ -252,19 +274,16 @@ public class CCSystem extends JPanel {
     
     
     /*
-     * Draw vertical grid lines using default settings.
-     * 
-     * The default is drawing 5 0.1 thick lines for every unit line
-     * using gray paint.
+     * Draw vertical grid lines.
      */
     private void drawXGridLines(Graphics2D g2d) {
-        drawXGridLines(g2d, 5, new BasicStroke(0.5f), Color.gray);
+        drawXGridLines(g2d, gridRatio, gridXStroke, gridXPaint);
     }
     
     
     
     /*
-     * Draw vertical grid lines a give amount of  times between each unit line.
+     * Draw vertical grid lines a given amount of times between each unit line.
      * 
      * Use the given stroke and paint to draw the grid lines.
      */
@@ -292,19 +311,16 @@ public class CCSystem extends JPanel {
     
     
     /*
-     * Draw horizontal grid lines using default settings.
-     * 
-     * The default is drawing 5 0.1f thick lines for every unit line
-     * using gray paint.
+     * Draw horizontal grid lines.
      */
     private void drawYGridLines(Graphics2D g2d) {
-        drawYGridLines(g2d, 5, new BasicStroke(0.5f), Color.gray);
+        drawYGridLines(g2d, gridRatio, gridYStroke, gridYPaint);
     }
     
     
     
     /*
-     * Draw horizontal grid lines {@code ratio} times between each unit line.
+     * Draw horizontal grid lines a given amount of times between each unit line
      * 
      * Use the given stroke and paint to draw the grid lines. 
      */
@@ -565,6 +581,270 @@ public class CCSystem extends JPanel {
     
     
     /**
+     * Set which paint the axes should be painted with.
+     * 
+     * @param paint
+     *        {@code Paint} to paint the axes with.
+     */
+    public void setAxesPaint(Paint paint) {
+        axisXPaint = paint;
+        axisYPaint = paint;
+    }
+    
+    
+    
+    /**
+     * Set which stroke the axes should be painted with.
+     * 
+     * @param stroke
+     *        {@Code Stroke} to paint the axes with.
+     */
+    public void setAxesStroke(Stroke stroke) {
+        axisXStroke = stroke;
+        axisYStroke = stroke;
+    }
+
+
+
+    /**
+     * Set whether the axes should be visible or not.
+     * 
+     * @param visible
+     *        If true, the axes are drawn. Otherwise they are hidden.
+     */
+    public void setAxesVisible(boolean visible) {
+        axisXVisible = visible;
+        axisYVisible = visible;
+    }
+    
+    
+    
+    /**
+     * Set which paint the x-axis should be painted with.
+     * 
+     * @param paint
+     *        {@code Paint} to paint the x-axis with.
+     */
+    public void setAxisXPaint(Paint paint) {
+        axisXPaint = paint;
+    }
+    
+    
+    
+    /**
+     * Set which stroke the x-axis should be painted with.
+     * 
+     * @param stroke
+     *        {@Code Stroke} to paint the x-axis with.
+     */
+    public void setAxisXStroke(Stroke stroke) {
+        axisXStroke = stroke;
+    }
+
+
+
+    /**
+     * Set whether the x-axis should be visible or not.
+     * 
+     * @param visible
+     *        If true, the x-axis is drawn. Otherwise it is hidden.
+     */
+    public void setAxisXVisible(boolean visible) {
+        axisXVisible = visible;
+    }
+
+
+
+    /**
+     * Set which paint the y-axis should be painted with.
+     * 
+     * @param paint
+     *        {@code Paint} to paint the y-axis with.
+     */
+    public void setAxisYPaint(Paint paint) {
+        axisYPaint = paint;
+    }
+    
+    
+    
+    /**
+     * Set which stroke the y-axis should be painted with.
+     * 
+     * @param stroke
+     *        {@Code Stroke} to paint the y-axis with.
+     */
+    public void setAxisYStroke(Stroke stroke) {
+        axisYStroke = stroke;
+    }
+    
+    
+    
+    /**
+     * Set whether the y-axis should be visible or not.
+     * 
+     * @param visible
+     *        If true, the y-axis is drawn. Otherwise it is hidden.
+     */
+    public void setAxisYVisible(boolean visible) {
+        axisYVisible = visible;
+    }
+    
+    
+    
+    /**
+     * Set which paint the grid should be painted with.
+     * 
+     * @param paint
+     *        {@code Paint} to paint the grid with.
+     */
+    public void setGridPaint(Paint paint) {
+        gridXPaint = paint;
+        gridYPaint = paint;
+    }
+    
+    
+    
+    /**
+     * Set which stroke the grid should be painted with.
+     * 
+     * @param stroke
+     *        {@Code Stroke} to paint the grid with.
+     */
+    public void setGridStroke(Stroke stroke) {
+        gridXStroke = stroke;
+        gridYStroke = stroke;
+    }
+
+
+
+    /**
+     * Set whether the grid should be visible or not.
+     * 
+     * @param visible
+     *        If true, the grid is drawn. Otherwise it is hidden.
+     */
+    public void setGridVisible(boolean visible) {
+        gridXVisible = visible;
+        gridYVisible = visible;
+    }
+    
+    
+    
+    /**
+     * Set which paint the horizontal grid-lines should be painted with.
+     * 
+     * @param paint
+     *        {@code Paint} to paint the horizontal grid-lines with.
+     */
+    public void setGridXPaint(Paint paint) {
+        gridXPaint = paint;
+    }
+    
+    
+    
+    /**
+     * Set which stroke the horizontal grid-lines should be painted with.
+     * 
+     * @param paint
+     *        {@code Stroke} to paint the horizontal grid-lines with.
+     */
+    public void setGridXStroke(Stroke stroke) {
+        gridXStroke = stroke;
+    }
+
+
+
+    /**
+     * Set whether the horizontal grid-lines should be visible or not.
+     * 
+     * @param visible
+     *        If true, the horizontal grid lines are drawn.
+     *        Otherwise they are hidden.
+     */
+    public void setGridXVisible(boolean visible) {
+        gridXVisible = visible;
+    }
+
+
+
+    /**
+     * Set which paint the vertical grid-lines should be painted with.
+     * 
+     * @param paint
+     *        {@code Paint} to paint the vertical grid-lines with.
+     */
+    public void setGridYPaint(Paint paint) {
+        gridYPaint = paint;
+    }
+    
+    
+    
+    /**
+     * Set which stroke the vertical grid-lines should be painted with.
+     * 
+     * @param stroke
+     *        {@Code Stroke} to paint the vertical grid-lines with.
+     */
+    public void setGridYStroke(Stroke stroke) {
+        gridYStroke = stroke;
+    }
+    
+    
+    
+    /**
+     * Set whether the vertical grid-lines should be visible or not.
+     * 
+     * @param visible
+     *        If true, the vertical grid-lines are drawn.
+     *        Otherwise they are hidden.
+     */
+    public void setGridYVisible(boolean visible) {
+        gridYVisible = visible;
+    }
+    
+    
+    
+    /**
+     * Set whether the unit lines on the axes should be visible or not.
+     * 
+     * @param visible
+     *        If true, unit lines are drawn on the axes.
+     *        Otherwise they are hidden.
+     */
+    public void setUnitsVisible(boolean visible) {
+        unitXVisible = visible;
+        unitYVisible = visible;
+    }
+    
+    
+    
+    /**
+     * Set whether the unit lines on the x-axis should be visible or not.
+     * 
+     * @param visible
+     *        If true, unit lines are drawn on the x-axis.
+     *        Otherwise they are hidden.
+     */
+    public void setUnitXVisible(boolean visible) {
+        unitXVisible = visible;
+    }
+    
+    
+    
+    /**
+     * Set whether the unit lines on the y-axis should be visible or not.
+     * 
+     * @param visible
+     *        If true, unit lines are drawn on the y-axis.
+     *        Otherwise they are hidden.
+     */
+    public void setUnitYVisible(boolean visible) {
+        unitYVisible = visible;
+    }
+    
+    
+    
+    /**
      * Set whether the coordinate system is movable with the mouse, i.e.
      * the scope of the system changes as the the mouse is clicked, held
      * and dragged over the system.
@@ -611,39 +891,6 @@ public class CCSystem extends JPanel {
      */
     public void setNiceGraphics(boolean niceGraphics) {
         this.niceGraphics = niceGraphics;
-    }
-
-
-
-    /**
-     * @param visible
-     *        If true, draw axes.
-     */
-    public void setVisibleAxes(boolean visible) {
-        drawXAxis = visible;
-        drawYAxis = visible;
-    }
-    
-    
-    
-    /**
-     * @param visible
-     *        If true, draw a grid.
-     */
-    public void setVisibleGrid(boolean visible) {
-        drawXGrid = visible;
-        drawYGrid = visible;
-    }
-    
-    
-    
-    /**
-     * @param visible
-     *        If true, draw unit lines.
-     */
-    public void setVisibleUnitLines(boolean visible) {
-        drawXUnits = visible;
-        drawYUnits = visible;
     }
     
     
