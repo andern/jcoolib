@@ -78,11 +78,15 @@ public class CCSystem extends JPanel {
     private Paint axisYPaint;
     private Paint gridXPaint;
     private Paint gridYPaint;
+    private Paint unitXPaint;
+    private Paint unitYPaint;
     
     private Stroke axisXStroke;
     private Stroke axisYStroke;
     private Stroke gridXStroke;
     private Stroke gridYStroke;
+    private Stroke unitXStroke;
+    private Stroke unitYStroke;
     
     private boolean niceGraphics;
     /* End of visual options */
@@ -165,11 +169,15 @@ public class CCSystem extends JPanel {
         axisYPaint = Color.black;
         gridXPaint = Color.gray;
         gridYPaint = Color.gray;
+        unitXPaint = Color.black;
+        unitYPaint = Color.black;
         
         axisXStroke = new BasicStroke(1.3f);
         axisYStroke = new BasicStroke(1.3f);
         gridXStroke = new BasicStroke(0.1f);
         gridYStroke = new BasicStroke(0.1f);
+        unitXStroke = new BasicStroke(1f);
+        unitYStroke = new BasicStroke(1f);
         
         gridRatio = 5;
         niceGraphics = true;
@@ -237,14 +245,22 @@ public class CCSystem extends JPanel {
         if (axisXVisible) {
             g2d.setPaint(axisXPaint);
             g2d.setStroke(axisXStroke);
-            if (unitXVisible) drawXUnitLines(g2d);
             g2d.drawLine(origin.x, 0, origin.x, getHeight());
+            if (unitXVisible) {
+                g2d.setPaint(unitXPaint);
+                g2d.setStroke(unitXStroke);
+                drawXUnitLines(g2d);
+            }
         }
         if (axisYVisible) {
             g2d.setPaint(axisYPaint);
             g2d.setStroke(axisYStroke);
-            if (unitYVisible) drawYUnitLines(g2d);
             g2d.drawLine(0, origin.y, getWidth(), origin.y);
+            if (unitYVisible) {
+                g2d.setPaint(unitYPaint);
+                g2d.setStroke(unitYStroke);
+                drawYUnitLines(g2d);
+            }
         }
     }
     
@@ -705,6 +721,18 @@ public class CCSystem extends JPanel {
     
     
     /**
+     * Set the number of grid lines between each unit line.
+     * 
+     * @param ratio
+     *        The number of grid lines between each unit line.
+     */
+    public void setGridRatio(double ratio) {
+        gridRatio = ratio;
+    }
+    
+    
+    
+    /**
      * Set which stroke the grid should be painted with.
      * 
      * @param stroke
@@ -805,6 +833,32 @@ public class CCSystem extends JPanel {
     
     
     /**
+     * Set which paint the unit lines should be painted with.
+     * 
+     * @param paint
+     *        {@code Paint} to paint the unit lines with.
+     */
+    public void setUnitsPaint(Paint paint) {
+        unitXPaint = paint;
+        unitYPaint = paint;
+    }
+    
+    
+    
+    /**
+     * Set which stroke the unit lines should be painted with.
+     * 
+     * @param stroke
+     *        {@code Stroke} to paint the unit lines lines with.
+     */
+    public void setUnitsStroke(Stroke stroke) {
+        unitXStroke = stroke;
+        unitYStroke = stroke;
+    }
+    
+    
+    
+    /**
      * Set whether the unit lines on the axes should be visible or not.
      * 
      * @param visible
@@ -819,6 +873,32 @@ public class CCSystem extends JPanel {
     
     
     /**
+     * Set which paint the unit lines on the x-axis should be painted with.
+     * 
+     * @param paint
+     *        {@code Paint} to paint the unit lines on the x-axis with.
+     */
+    public void setUnitXPaint(Paint paint) {
+        unitXPaint = paint;
+        unitYPaint = paint;
+    }
+    
+    
+    
+    /**
+     * Set which stroke the unit lines on the x-axis should be painted with.
+     * 
+     * @param stroke
+     *        {@code Stroke} to paint the unit lines on the x-axis lines with.
+     */
+    public void setUnitXStroke(Stroke stroke) {
+        unitXStroke = stroke;
+        unitYStroke = stroke;
+    }
+    
+    
+    
+    /**
      * Set whether the unit lines on the x-axis should be visible or not.
      * 
      * @param visible
@@ -827,6 +907,32 @@ public class CCSystem extends JPanel {
      */
     public void setUnitXVisible(boolean visible) {
         unitXVisible = visible;
+    }
+    
+    
+    
+    /**
+     * Set which paint the unit lines on the y-axis should be painted with.
+     * 
+     * @param paint
+     *        {@code Paint} to paint the unit lines on the y-axis with.
+     */
+    public void setUnitYPaint(Paint paint) {
+        unitXPaint = paint;
+        unitYPaint = paint;
+    }
+    
+    
+    
+    /**
+     * Set which stroke the unit lines on the y-axis should be painted with.
+     * 
+     * @param stroke
+     *        {@code Stroke} to paint the unit lines on the y-axis lines with.
+     */
+    public void setUnitYStroke(Stroke stroke) {
+        unitXStroke = stroke;
+        unitYStroke = stroke;
     }
     
     
