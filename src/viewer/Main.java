@@ -1,5 +1,6 @@
 package viewer;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.Random;
 
@@ -17,27 +18,43 @@ public class Main extends JFrame {
         setVisible(true);
         setSize(800, 600);
         setLocationRelativeTo(null);
-        pack();
+//        pack();
         
         CCSystem s = new CCSystem();
         add(s);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        s.add(new Line(4.0, 1.0));
-        s.add(new Line(-1/4.0, 2));
+        s.add(new Line(4.0, 1.0, Color.blue));
+        s.setNiceGraphics(true);
+//        s.setAxisXPaint(Color.green);
+//        s.setAxisYPaint(Color.cyan);
+//        s.setUnitsPaint(Color.white);
+//        s.setGridXPaint(Color.yellow);
+//        s.setGridYPaint(Color.orange);
+//        s.setGridStroke(new BasicStroke(1f));
+//        s.setGridRatio(10);
+//        s.setGridPaint(Color.pink);
+//        s.setGridStroke(new BasicStroke(0.5f));
+//        s.setGridVisible(true);
+//        s.setZoomable(false);
+//        s.setMovable(false);
+        
+//        s.add(new Line(-1/4.0, 2));
         
         
 //        s.setVisibleUnitLines(true);
 //        s.setVisibleAxes(true);
 //        s.setNiceGraphics(false);
         
-        Random r = new Random();
-        
+//        Random r = new Random();
+//        
 //        for (int i = 0; i < 100; i++) {
-//            double slope = r.nextDouble();
-//            if (r.nextBoolean()) slope = -slope;
-//            double yintercept = r.nextDouble()*100;
-//            if (r.nextBoolean()) yintercept = -yintercept;
+//            double a = r.nextDouble();
+//            double b = r.nextDouble();
+//            double c = r.nextDouble();
+//            if (r.nextBoolean()) a = -a;
+//            if (r.nextBoolean()) b = -b;
+//            if (r.nextBoolean()) c = -c;
 //            
 //            int cint = r.nextInt(13);
 //            Color color;
@@ -58,13 +75,8 @@ public class Main extends JFrame {
 //            default: color = Color.yellow;
 //            }
 //            
-////            System.out.printf("Adding line: y = %-2fx + %-2f%n", slope, yintercept);
-//            s.add(new Line(slope, yintercept, color));
+//            s.add(new Line(a,b,c,color));
 //        }
-        
-//        s.add(new Line(3, 8, Color.blue));
-//        s.add(new Line(-3, 5, Color.red));
-//        s.add(new Line(-5, 3, Color.orange));
     }
     public static void main(String[] args) {
         new Main();
