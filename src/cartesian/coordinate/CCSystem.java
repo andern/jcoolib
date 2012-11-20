@@ -32,6 +32,9 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -135,8 +138,8 @@ public class CCSystem extends JPanel {
      * 
      * vbu stands for "value between unit lines"
      */
-    private double vbuX;
-    private double vbuY;
+    private BigDecimal vbuX;
+    private BigDecimal vbuY;
     
     /* The origin of system 1 and system 2 */
     private Point2D.Double origin2d;
@@ -145,6 +148,10 @@ public class CCSystem extends JPanel {
     /* Some listeners */
     private MouseListener mouseListener;
     private MouseWheelListener mouseWheelListener;
+    
+    private final MathContext prec = new MathContext(10);
+    
+    
     
     
     
@@ -305,7 +312,7 @@ public class CCSystem extends JPanel {
      */
     private void drawXGridLines(Graphics2D g2d, double ratio,
                                Stroke stroke, Paint paint) {
-        double vbu = this.vbuX / ratio;
+        double vbu = this.vbuX.doubleValue() / ratio;
         
         int idx = (int) Math.ceil(minX / vbu);
         int end = (int) Math.floor(maxX / vbu);
@@ -342,7 +349,7 @@ public class CCSystem extends JPanel {
      */
     private void drawYGridLines(Graphics2D g2d, double ratio,
                                Stroke stroke, Paint paint) {
-        double vbu = this.vbuY / ratio;
+        double vbu = this.vbuY.doubleValue() / ratio;
         
         int idx = (int) Math.ceil(minY / vbu);
         int end = (int) Math.floor(maxY / vbu);
@@ -453,12 +460,24 @@ public class CCSystem extends JPanel {
 
 
     /* Draw a single unit line on the x-axis at a given value. */
-    private void drawXUnitLine(Graphics2D g2d, double val) {
+    private void drawXUnitLine(Graphics2D g2d, BigDecimal val) {
         /* Don't draw anything at the origin. */
-        if (val == 0.0) return;
-        String strval = Double.toString(val);
+        if (val.doubleValue() == 0.0) return;
         
-        Point2D.Double p2d = new Point2D.Double(val, origin2d.y);
+        /* val is "small" if -10^7 < val < 10^7. */
+        BigDecimal big = BigDecimal.valueOf(10000000);
+        boolean small = val.compareTo(big) < 0
+                && val.compareTo(big.negate()) > 0;
+        
+        /* 
+         * When val is not "small", BigDecimal's toString does not use
+         * scientific notation, so Double's toString is used instead.
+         */
+        String strval;
+        if (small) strval = val.toString();
+        else strval = Double.toString(val.doubleValue());
+        
+        Point2D.Double p2d = new Point2D.Double(val.doubleValue(), origin2d.y);
         Point p = translate(p2d);
         
         int strValPixels = 7 * strval.length();
@@ -477,25 +496,33 @@ public class CCSystem extends JPanel {
          * to find the value of i such that i * vbuX is the value at the first
          * visible unit line.
          */
-        int idx = (int) Math.ceil(minX / vbuX);
+        int idx = (int) Math.ceil(minX / vbuX.doubleValue());
         
         /* Also find the value of the last visible unit line. */
-        int end = (int) Math.floor(maxX / vbuX);
+        int end = (int) Math.floor(maxX / vbuX.doubleValue());
         
-        for (int i = idx; i <= end; i++) drawXUnitLine(g2d, i*vbuX);
+        for (int i = idx; i <= end; i++) drawXUnitLine(g2d,
+                BigDecimal.valueOf(i).multiply(vbuX, prec));
     }
 
 
 
     /* Draw a single unit line on the y-axis at a given value. */
-    private void drawYUnitLine(Graphics2D g2d, double val) {
-        if (val == 0.0) return;
-        String strval = Double.toString(val);
+    private void drawYUnitLine(Graphics2D g2d, BigDecimal val) {
+        if (val.doubleValue() == 0.0) return;
+
+        BigDecimal big = BigDecimal.valueOf(10000000);
+        boolean small = val.compareTo(big) < 0
+                && val.compareTo(big.negate()) > 0;
+
+        String strval;
+        if (small) strval = val.toString();
+        else strval = Double.toString(val.doubleValue());
         
-        Point2D.Double p2d = new Point2D.Double(origin2d.x, val);
+        Point2D.Double p2d = new Point2D.Double(origin2d.x, val.doubleValue());
         Point p = translate(p2d);
         
-        int strValPixels = 7 * strval.length();
+        int strValPixels = 7 * strval.length() + 7;
         int offset = (minX >= 0) ? 5 : -strValPixels;
         
         g2d.drawLine(p.x-ulSize, p.y, p.x+ulSize, p.y);
@@ -506,10 +533,27 @@ public class CCSystem extends JPanel {
 
     /* Draw all the unit lines on the x-axis. */ 
     private void drawYUnitLines(Graphics2D g2d) {
-        int i = (int) Math.ceil(minY / vbuY);
-        int end = (int) Math.floor(maxY / vbuY);
+        int idx = (int) Math.ceil(minY / vbuY.doubleValue());
+        int end = (int) Math.floor(maxY / vbuY.doubleValue());
         
-        for (; i <= end; i++) drawYUnitLine(g2d, i*vbuY);
+        
+        for (int i = idx; i <= end; i++) drawYUnitLine(g2d,
+                BigDecimal.valueOf(i).multiply(vbuY, prec));
+    }
+    
+    
+    
+    private BigDecimal findScale(double num) {
+        int x = (int) Math.floor(Math.log10(num));
+        
+        BigDecimal scale = BigDecimal.TEN.pow(x, prec);
+        
+        /* Don't need more than double precision here */
+        double quot = num / scale.doubleValue();
+        if (quot > 5.0) return scale.multiply(BigDecimal.TEN, prec);
+        if (quot > 2.0) return scale.multiply(BigDecimal.valueOf(5), prec);
+        if (quot > 1.0) return scale.multiply(BigDecimal.valueOf(2), prec);
+        else return scale;
     }
 
 
@@ -518,16 +562,16 @@ public class CCSystem extends JPanel {
      * Round this exact value to a value (of the same magnitude) that can be
      * written with very few decimals.
      */
-    private double findScale(double num) {
-        int x = (int) Math.floor(Math.log10(num));
-        double scale = Math.pow(10, x);
-        
-        double quot = num / scale;
-        if (quot > 5.0) return 10*scale;
-        if (quot > 2.0) return 5*scale;
-        if (quot > 1.0) return 2*scale;
-        else return scale;
-    }
+//    private double findScale(double num) {
+//        int x = (int) Math.floor(Math.log10(num));
+//        double scale = Math.pow(10, x);
+//        
+//        double quot = num / scale;
+//        if (quot > 5.0) return 10*scale;
+//        if (quot > 2.0) return 5*scale;
+//        if (quot > 1.0) return 2*scale;
+//        else return scale;
+//    }
     
     
     
