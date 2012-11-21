@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<project name="jcoolib" default="jar">
+  <target name="clean" description="remove intermediate files">
+    <delete dir="bin"/>
+  </target>
+
+  <target name="clobber" depends="clean" description="remove all artifact files">
+    <delete file="jcoolib-test.jar"/>
+    <delete file="jcoolib.jar"/>
+  </target>
+
+  <target name="compile" description="compile the Java source code to class files">
+    <mkdir dir="bin"/>
+    <javac includeantruntime="false" srcdir="src" destdir="bin">
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile" description="create a Jar file for the library">
+    <jar destfile="jcoolib.jar" filesetmanifest="skip">
+      <fileset dir="bin" includes="**/*.class"/>
+    </jar>
+  </target>
+
+  <target name="test" depends="compile" description="create a runnable Jar file for testing purposes">
+    <jar destfile="jcoolib-test.jar" filesetmanifest="skip">
+      <fileset dir="bin" includes="**/*.class"/>
+      <manifest>
+        <attribute name="Main-class" value="viewer/Main"/>
+      </manifest>
+    </jar>
+  </target>
+</project>
