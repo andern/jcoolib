@@ -34,7 +34,6 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +48,7 @@ import javax.swing.JPanel;
  * The system can contain objects such as lines, points and polygons.
  * 
  * @author Andreas Halle
- * @see    Line
+ * @see    CCLine
  */
 public class CCSystem extends JPanel {
     /*
@@ -102,7 +101,7 @@ public class CCSystem extends JPanel {
     private boolean zoomable;
     
     /* Object containers */
-    private List<Line> lines;
+    private List<CCLine> lines;
     
     /* Define the range of the visible xy-plane */
     private double minX;
@@ -193,7 +192,7 @@ public class CCSystem extends JPanel {
         ulScale = 65;
         ulSize = 4;
 
-        lines = new ArrayList<Line>();
+        lines = new ArrayList<CCLine>();
         
         /* Add some default listeners */
         mouseListener = new mouseListener();
@@ -213,12 +212,12 @@ public class CCSystem extends JPanel {
     
     
     /**
-     * Add a {@code Line} to the coordinate system.
+     * Add a {@code CCLine} to the coordinate system.
      * 
      * @param line
-     *        a {@code Line} object.
+     *        a {@code CCLine} object.
      */
-    public void add(Line line) {
+    public void add(CCLine line) {
         lines.add(line);
     }
     
@@ -364,7 +363,7 @@ public class CCSystem extends JPanel {
     /*
      * Draw a Line.
      */
-    private void drawLine(Graphics2D g2d, Line line) {
+    private void drawLine(Graphics2D g2d, CCLine line) {
         g2d.setPaint(line.paint);
         g2d.setStroke(line.stroke);
         if (line.b == 0.0) drawLineVertical(g2d, line);
@@ -375,7 +374,7 @@ public class CCSystem extends JPanel {
 
 
     /* Assume a == 0.0 */
-    private void drawLineHorizontal(Graphics2D g2d, Line line) {
+    private void drawLineHorizontal(Graphics2D g2d, CCLine line) {
         int mul = (line.b  < 0) ? -1 : 1;
         double yval = line.c*mul;
         
@@ -395,7 +394,7 @@ public class CCSystem extends JPanel {
      * 
      * Assume a, b != 0.
      */
-    private void drawLineSlope(Graphics2D g2d, Line line) {
+    private void drawLineSlope(Graphics2D g2d, CCLine line) {
         /* Find intercepts with the display window */
         double i_minX = line.solveForY(minX);
         double i_maxX = line.solveForY(maxX);
@@ -444,7 +443,7 @@ public class CCSystem extends JPanel {
 
 
     /* Assume b == 0.0 */
-    private void drawLineVertical(Graphics2D g2d, Line line) {
+    private void drawLineVertical(Graphics2D g2d, CCLine line) {
         int mul = (line.a < 0) ? -1 : 1;
         double xval = line.c*mul;
         
@@ -635,7 +634,7 @@ public class CCSystem extends JPanel {
         
         g2d.setStroke(new BasicStroke(1f));
         
-        for (Line line : lines) drawLine(g2d, line);
+        for (CCLine line : lines) drawLine(g2d, line);
     }
     
     
