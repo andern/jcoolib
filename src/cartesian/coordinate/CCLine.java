@@ -24,7 +24,7 @@ import java.awt.Paint;
 import java.awt.Stroke;
 
 /**
- * {@code Line} represents a straight line in a Cartesian coordinate system.
+ * {@code CCLine} represents a straight line in a Cartesian coordinate system.
  * <p>
  * Lines are stored as a linear equation on the format:
  * <pre>
@@ -34,7 +34,7 @@ import java.awt.Stroke;
  * @author Andreas Halle
  * @see    CCSystem
  */
-public class Line {
+public class CCLine {
     protected double a;
     protected double b;
     protected double c;
@@ -55,7 +55,7 @@ public class Line {
      *        y-intercept; the y-coordinate of the location where the line
      *        crosses the y axis.
      */
-    public Line(double m, double b) {
+    public CCLine(double m, double b) {
         this(-m, 1, b);
     }
 
@@ -74,7 +74,7 @@ public class Line {
      * @param c
      *        A constant.
      */
-    public Line(double a, double b, double c) {
+    public CCLine(double a, double b, double c) {
         this(a, b, c, Color.black, new BasicStroke(1f));
     }
     
@@ -95,7 +95,7 @@ public class Line {
      * @param paint
      *        Draw the line using this paint.
      */
-    public Line(double a, double b, double c, Paint paint) {
+    public CCLine(double a, double b, double c, Paint paint) {
         this(a, b, c, paint, new BasicStroke(1f));
     }
     
@@ -115,7 +115,7 @@ public class Line {
      * @param paint
      *        Draw the line using this paint.
      */
-    public Line(double m, double b, Paint paint) {
+    public CCLine(double m, double b, Paint paint) {
         this(-m, 1, b, paint);
     }
 
@@ -138,7 +138,7 @@ public class Line {
      * @param stroke
      *        Draw the line using this stroke.
      */
-    public Line(double a, double b, double c, Paint paint, Stroke stroke) {
+    public CCLine(double a, double b, double c, Paint paint, Stroke stroke) {
         this.a = a;
         this.b = b;
         this.c = c;
@@ -164,7 +164,7 @@ public class Line {
      * @param stroke
      *        Draw the line using this stroke.
      */
-    public Line(double m, double b, Paint paint, Stroke stroke) {
+    public CCLine(double m, double b, Paint paint, Stroke stroke) {
         this(-m, 1, b, paint, stroke);
     }
     

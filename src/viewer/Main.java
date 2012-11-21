@@ -6,7 +6,7 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 import cartesian.coordinate.CCSystem;
-import cartesian.coordinate.Line;
+import cartesian.coordinate.CCLine;
 
 public class Main extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -24,7 +24,7 @@ public class Main extends JFrame {
         add(s);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        s.add(new Line(4.0, 1.0, Color.blue));
+        s.add(new CCLine(4.0, 1.0, Color.blue));
         s.setNiceGraphics(true);
 //        s.setAxisXPaint(Color.green);
 //        s.setAxisYPaint(Color.cyan);
