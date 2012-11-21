@@ -139,6 +139,11 @@ public class CCLine {
      *        Draw the line using this stroke.
      */
     public CCLine(double a, double b, double c, Paint paint, Stroke stroke) {
+        if (a == 0 && b == 0) {
+            String e = "at least one of a or b must be nonzero in ax + by = c.";
+            throw new IllegalArgumentException(e);
+        }
+        
         this.a = a;
         this.b = b;
         this.c = c;
@@ -172,6 +177,8 @@ public class CCLine {
     
     /**
      * Find the x-value of the line at a specific y-value.
+     * <p>
+     * Will return {@code NaN} if <i>a</i> is 0.
      * 
      * @param  y
      *         y value of the function.
@@ -186,6 +193,8 @@ public class CCLine {
     
     /**
      * Find the y-value of the line at a specific x-value.
+     * <p>
+     * Will return {@code NaN} if <i>b</i> is 0.
      * 
      * @param  x
      *         x value of the function.
