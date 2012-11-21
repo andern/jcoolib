@@ -20,10 +20,12 @@ package cartesian.coordinate;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
@@ -102,6 +104,7 @@ public class CCSystem extends JPanel {
     
     /* Object containers */
     private List<CCLine> lines;
+    private List<CCPolygon> polygons;
     
     /* Define the range of the visible xy-plane */
     private double minX;
@@ -152,10 +155,17 @@ public class CCSystem extends JPanel {
     
     
     
-    
-    
     /**
      * Initialize a new empty coordinate system.
+     * <p>
+     * xy-axes, units and a grid is drawn by default. This can be changed with
+     * the following methods:
+     * <pre>
+     *     setAxesVisible(boolean)
+     *     setUnitsVisible(boolean)
+     *     setGridVisible(boolean)
+     * </pre>
+     * respectively.
      */
     public CCSystem(double minX, double minY, double maxX, double maxY) {
         this.minX = minX;
@@ -193,6 +203,7 @@ public class CCSystem extends JPanel {
         ulSize = 4;
 
         lines = new ArrayList<CCLine>();
+        polygons = new ArrayList<CCPolygon>();
         
         /* Add some default listeners */
         mouseListener = new mouseListener();
@@ -219,6 +230,12 @@ public class CCSystem extends JPanel {
      */
     public void add(CCLine line) {
         lines.add(line);
+    }
+    
+    
+    
+    public void add(CCPolygon polygon) {
+        polygons.add(polygon);
     }
     
     
@@ -455,6 +472,34 @@ public class CCSystem extends JPanel {
         
         g2d.drawLine(x, y1, x, y2);
     }
+    
+    
+    
+    /* Draw a polygon */
+    private void drawPolygon(Graphics2D g2d, CCPolygon poly) {
+        int num = poly.xpoints.length;
+        int[] xpoints = new int[num];
+        int[] ypoints = new int[num];
+        
+        for (int i = 0; i < num; i++) {
+            xpoints[i] = translateX(poly.xpoints[i]);
+            ypoints[i] = translateY(poly.ypoints[i]);
+        }
+        Polygon p = new Polygon(xpoints, ypoints, num);
+        
+        /* If the polygon has GradientPaint, translate the coordinates of GP */
+        if (poly.fill instanceof GradientPaint) {
+            g2d.setPaint(translateGradientPaint((GradientPaint) poly.fill));
+            g2d.fill(p);
+        } else if (poly.fill != null) {
+            g2d.setPaint(poly.fill);
+            g2d.fill(p);
+        }
+        
+        g2d.setStroke(poly.stroke);
+        g2d.setPaint(poly.paint);
+        g2d.draw(p);
+    }
 
 
 
@@ -629,12 +674,11 @@ public class CCSystem extends JPanel {
         
         if (niceGraphics) g2d.addRenderingHints(getNiceGraphics());
         
-        drawAxes(g2d);
-        drawGrid(g2d);
-        
-        g2d.setStroke(new BasicStroke(1f));
-        
+        for (CCPolygon p : polygons) drawPolygon(g2d, p);
         for (CCLine line : lines) drawLine(g2d, line);
+        
+        drawGrid(g2d);
+        drawAxes(g2d);
     }
     
     
@@ -1089,6 +1133,18 @@ public class CCSystem extends JPanel {
     
     
     
+    private GradientPaint translateGradientPaint(GradientPaint gp) {
+        Point p1 = translate(gp.getPoint1());
+        Point p2 = translate(gp.getPoint2());
+
+        Color c1 = gp.getColor1();
+        Color c2 = gp.getColor2();
+
+        return new GradientPaint(p1, c1, p2, c2);
+    }
+    
+    
+    
     /* Translate a single x-coordinate from System 2 to System 1. */
     private int translateX(double x) {
         return (int) Math.round((x - minX) / xscale);
@@ -1193,11 +1249,8 @@ public class CCSystem extends JPanel {
         public void mouseWheelMoved(MouseWheelEvent e) {
             int units = e.getUnitsToScroll();
 
-            double distx = maxX - minX;
-            double disty = maxY - minY;
-
-            double zoomx = distx / 100.0 * units;
-            double zoomy = disty / 100.0 * units;
+            double zoomx = distX / 100.0 * units;
+            double zoomy = distY / 100.0 * units;
 
             zoom(zoomx, zoomy);
 
