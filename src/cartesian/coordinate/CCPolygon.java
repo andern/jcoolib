@@ -83,7 +83,9 @@ public class CCPolygon {
      * interior of the polygon will be filled in pink.
      * 
      * @param xpoints
+     *        x-coordinates for the points that form the polygon.
      * @param ypoints
+     *        y-coordinates for the points that form the polygon.
      */
     public CCPolygon(double [] xpoints, double [] ypoints) {
         this(xpoints, ypoints, Color.black, Color.pink, new BasicStroke(1f));
