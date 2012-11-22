@@ -66,7 +66,9 @@ public class CCPoint {
      * The point will be painted in black with a 1 pixel thick edge.
      * 
      * @param x
+     *        x-coordinate for the location of the point.
      * @param y
+     *        y-coordinate for the location of the point.
      */
     public CCPoint(double x, double y) {
         this(x, y, Color.black, new BasicStroke(1f));

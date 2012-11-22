@@ -33,6 +33,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -105,6 +106,7 @@ public class CCSystem extends JPanel {
     /* Object containers */
     private List<CCLine> lines;
     private List<CCPolygon> polygons;
+    private List<CCPoint> points;
     
     /* Define the range of the visible xy-plane */
     private double minX;
@@ -183,8 +185,8 @@ public class CCSystem extends JPanel {
         
         axisXPaint = Color.black;
         axisYPaint = Color.black;
-        gridXPaint = Color.gray;
-        gridYPaint = Color.gray;
+        gridXPaint = Color.black;
+        gridYPaint = Color.black;
         unitXPaint = Color.black;
         unitYPaint = Color.black;
         
@@ -204,6 +206,7 @@ public class CCSystem extends JPanel {
 
         lines = new ArrayList<CCLine>();
         polygons = new ArrayList<CCPolygon>();
+        points = new ArrayList<CCPoint>();
         
         /* Add some default listeners */
         mouseListener = new mouseListener();
@@ -230,6 +233,12 @@ public class CCSystem extends JPanel {
      */
     public void add(CCLine line) {
         lines.add(line);
+    }
+    
+    
+    
+    public void add(CCPoint point) {
+        points.add(point);
     }
     
     
@@ -475,6 +484,19 @@ public class CCSystem extends JPanel {
     
     
     
+    /* Draw a point */
+    private void drawPoint(Graphics2D g2d, CCPoint point) {
+        Point p = translate(new Point2D.Double(point.x,  point.y));
+        
+        g2d.setPaint(point.paint);
+        g2d.setStroke(point.stroke);
+        Ellipse2D r2d = new Ellipse2D.Double(p.x-2, p.y-2, 4, 4);
+        g2d.draw(r2d);
+        g2d.fill(r2d);
+    }
+    
+    
+    
     /* Draw a polygon */
     private void drawPolygon(Graphics2D g2d, CCPolygon poly) {
         int num = poly.xpoints.length;
@@ -676,6 +698,7 @@ public class CCSystem extends JPanel {
         
         for (CCPolygon p : polygons) drawPolygon(g2d, p);
         for (CCLine line : lines) drawLine(g2d, line);
+        for (CCPoint p : points) drawPoint(g2d, p);
         
         drawGrid(g2d);
         drawAxes(g2d);
