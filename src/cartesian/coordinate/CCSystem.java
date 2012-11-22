@@ -618,7 +618,7 @@ public class CCSystem extends JPanel {
         try {
             scale = BigDecimal.TEN.pow(x, prec);
         } catch (ArithmeticException e) {
-            scale = BigDecimal.ONE;
+            scale = BigDecimal.valueOf(Double.MAX_VALUE);
         }
         
         /* Don't need more than double precision here */
