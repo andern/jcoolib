@@ -254,6 +254,8 @@ public class CCSystem extends JPanel {
      */
     public void clear() {
         lines.clear();
+        points.clear();
+        polygons.clear();
         updateUI();
     }
     
@@ -403,10 +405,9 @@ public class CCSystem extends JPanel {
     private void drawLineHorizontal(Graphics2D g2d, CCLine line) {
         int mul = (line.b  < 0) ? -1 : 1;
         double yval = line.c*mul;
+        if (!validY(yval)) return; /* Don't draw lines off the screen. */
         
         int y = translateY(yval);
-        if (!validY(y)) return; /* Don't draw lines off the screen. */
-        
         int x1 = translateX(minX);
         int x2 = translateX(maxX);
         
@@ -472,10 +473,9 @@ public class CCSystem extends JPanel {
     private void drawLineVertical(Graphics2D g2d, CCLine line) {
         int mul = (line.a < 0) ? -1 : 1;
         double xval = line.c*mul;
+        if (!validX(xval)) return; /* Don't draw lines off the screen. */
         
         int x = translateX(xval);
-        if (!validX(x)) return; /* Don't draw lines off the screen. */
-        
         int y1 = translateY(minY);
         int y2 = translateY(maxY);
         
@@ -518,9 +518,11 @@ public class CCSystem extends JPanel {
             g2d.fill(p);
         }
         
-        g2d.setStroke(poly.stroke);
-        g2d.setPaint(poly.paint);
-        g2d.draw(p);
+        if (poly.stroke != null && poly.paint != null) {
+            g2d.setStroke(poly.stroke);
+            g2d.setPaint(poly.paint);
+            g2d.draw(p);
+        }
     }
 
 
@@ -612,7 +614,12 @@ public class CCSystem extends JPanel {
     private BigDecimal findScale(double num) {
         int x = (int) Math.floor(Math.log10(num));
         
-        BigDecimal scale = BigDecimal.TEN.pow(x, prec);
+        BigDecimal scale;
+        try {
+            scale = BigDecimal.TEN.pow(x, prec);
+        } catch (ArithmeticException e) {
+            scale = BigDecimal.ONE;
+        }
         
         /* Don't need more than double precision here */
         double quot = num / scale.doubleValue();
@@ -691,17 +698,17 @@ public class CCSystem extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-        
         updatePosition();
         
         if (niceGraphics) g2d.addRenderingHints(getNiceGraphics());
         
         for (CCPolygon p : polygons) drawPolygon(g2d, p);
         for (CCLine line : lines) drawLine(g2d, line);
-        for (CCPoint p : points) drawPoint(g2d, p);
         
         drawGrid(g2d);
         drawAxes(g2d);
+        
+        for (CCPoint p : points) drawPoint(g2d, p);
     }
     
     
