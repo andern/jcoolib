@@ -22,6 +22,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.awt.geom.Point2D;
 
 /**
  * {@code CCPolygon} represents a polygon in a Cartesian coordinate system, i.e.
@@ -78,6 +79,31 @@ public class CCPolygon {
     /**
      * Create a polygon from a set of points. A polygon needs more than two
      * points.
+     * 
+     * @param points
+     *        Array of {@code Point2D} points that form the polygon.
+     * @param paint
+     *        {@code Paint} to paint the edges of the polygon with.
+     * @param fill
+     *        {@code Paint} to fill the interior of the polygon with.
+     * @param stroke
+     *        Draw the edges of the polygon with this {@code Stroke}.
+     */
+    public CCPolygon(Point2D[] points, Paint paint,
+                                            Paint fill, Stroke stroke) {
+        this(new double[points.length], new double[points.length], paint, fill,
+                                                                        stroke);
+        for (int i = 0; i < points.length; i++) {
+            xpoints[i] = points[i].getX();
+            ypoints[i] = points[i].getY();
+        }
+    }
+    
+    
+    
+    /**
+     * Create a polygon from a set of points. A polygon needs more than two
+     * points.
      * <p>
      * The edges will be painted in black with a 1 pixel thick edge. The
      * interior of the polygon will be filled in pink.
@@ -89,5 +115,21 @@ public class CCPolygon {
      */
     public CCPolygon(double [] xpoints, double [] ypoints) {
         this(xpoints, ypoints, Color.black, Color.pink, new BasicStroke(1f));
+    }
+    
+    
+    
+    /**
+     * Create a polygon from a set of points. A polygon needs more than two
+     * points.
+     * <p>
+     * The edges will be painted in black with a 1 pixel thick edge. The
+     * interior of the polygon will be filled in pink.
+     * 
+     * @param points
+     *        Array of {@code Point2D} points that form the polygon.
+     */
+    public CCPolygon(Point2D[] points) {
+        this(points, Color.black, Color.pink, new BasicStroke(1f));
     }
 }
