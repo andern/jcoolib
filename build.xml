@@ -18,7 +18,7 @@
 
   <target name="jar" depends="compile" description="create a Jar file for the library">
     <jar destfile="jcoolib.jar" filesetmanifest="skip">
-      <fileset dir="bin" includes="**/*.class"/>
+      <fileset dir="bin" includes="**/*.class" excludes="test/*.class"/>
     </jar>
   </target>
 
