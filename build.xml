@@ -6,7 +6,7 @@
   </target>
 
   <target name="clobber" depends="clean" description="remove all artifact files">
-    <delete file="jcoolib-test.jar"/>
+    <delete file="jcoolib-example.jar"/>
     <delete file="jcoolib.jar"/>
   </target>
 
@@ -18,15 +18,15 @@
 
   <target name="jar" depends="compile" description="create a Jar file for the library">
     <jar destfile="jcoolib.jar" filesetmanifest="skip">
-      <fileset dir="bin" includes="**/*.class" excludes="test/*.class"/>
+      <fileset dir="bin" includes="**/*.class" excludes="example/*.class"/>
     </jar>
   </target>
 
-  <target name="test" depends="compile" description="create a runnable Jar file for testing purposes">
-    <jar destfile="jcoolib-test.jar" filesetmanifest="skip">
+  <target name="example" depends="compile" description="create a runnable Jar file for testing the example code">
+    <jar destfile="jcoolib-example.jar" filesetmanifest="skip">
       <fileset dir="bin" includes="**/*.class"/>
       <manifest>
-        <attribute name="Main-class" value="viewer/Main"/>
+        <attribute name="Main-class" value="example/Main"/>
       </manifest>
     </jar>
   </target>
