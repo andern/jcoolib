@@ -1,0 +1,18 @@
+Run the following commands:
+1. git clone https://github.com/andern/jcoolib.git
+2. cd jcoolib
+3. ant
+
+Compiling jcoolib requires:
+* Java Development Kit
+* Apache Ant
+
+Details about the steps above:
+1. To clone the repository, you need git installed on your system.
+   Alternatively, you can download the repository as an archive file
+   on the project web page.
+2. Enter the newly downloaded directory.
+3. Compile the sources of jcoolib and build a jar that is runnable on
+   several platforms.
+
+Type 'ant -p' for information about several build targets for jcoolib.

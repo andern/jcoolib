@@ -20,7 +20,7 @@ public class Main extends JFrame {
         setVisible(true);
         setSize(800, 600);
         setLocationRelativeTo(null);
-        CCSystem s = new CCSystem();
+        CCSystem s = new CCSystem(0.0, 0.0, 10.0, 10.0);
         add(s);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
@@ -29,7 +29,13 @@ public class Main extends JFrame {
         double[] y = new double[]{-1,-2,3};
         CCPolygon ccp = new CCPolygon(x, y);
         
-        s.add(new CCLine(4.0, 1.0, Color.blue));
+        s.add(new CCLine(1.0, 0.0, Color.blue));
+        s.add(new CCLine(1.0, 5.0, Color.red));
+        s.add(new CCLine(-1.0, 5.0, Color.cyan));
+        s.add(new CCLine(-1.0, 15.0, Color.yellow));
+        s.add(new CCLine(1.0, -5.0, Color.green));
+        s.add(new CCLine(1.0, 0.0, 5.0, Color.orange));
+        s.add(new CCLine(0.0, 1.0, 5.0, Color.pink));
         s.add(new CCPoint(4, 5));
         s.add(ccp);
         

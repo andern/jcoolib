@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Andreas Halle
+ * Copyright (C) 2012-2014 Andreas Halle
  *
  * This file is part of jcoolib
  *
@@ -431,7 +431,7 @@ public class CCSystem extends JPanel {
         boolean v_maxX = validY(i_maxX);
         boolean v_minY = validX(i_minY);
         boolean v_maxY = validX(i_maxY);
-        
+
         /* 
          * Possible intercept-pairs:
          *  1. minX and minY        2. minX and maxY        3. minX and maxX
@@ -439,7 +439,11 @@ public class CCSystem extends JPanel {
          */
         Point2D p2d1;
         Point2D p2d2;
-        if (v_minX && v_minY) {
+        /* Special case, from bottom left corner to upper right corner */
+        if (v_minX && v_maxX && v_minY && v_maxY) {
+            p2d1 = new Point2D.Double(minX, i_minX);
+            p2d2 = new Point2D.Double(i_maxY, maxY);
+        } else if (v_minX && v_minY) {
             p2d1 = new Point2D.Double(minX, i_minX);
             p2d2 = new Point2D.Double(i_minY, minY);
         } else if (v_minX && v_maxY) {
@@ -460,10 +464,10 @@ public class CCSystem extends JPanel {
         } else {
             return; /* Don't draw lines off the screen. */
         }
-        
+
         Point p1 = translate(p2d1);
         Point p2 = translate(p2d2);
-        
+
         g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
     }
 
