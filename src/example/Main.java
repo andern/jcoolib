@@ -30,6 +30,7 @@ public class Main extends JFrame {
         CCPolygon ccp = new CCPolygon(x, y);
         
         s.add(new CCLine(1.0, 0.0, Color.blue));
+        s.add(new CCLine(-1.0, 10.0, Color.magenta));
         s.add(new CCLine(1.0, 5.0, Color.red));
         s.add(new CCLine(-1.0, 5.0, Color.cyan));
         s.add(new CCLine(-1.0, 15.0, Color.yellow));

@@ -1,3 +1,10 @@
+Thu Aug 21, 2014 - 0.1.2
+===========================
+* BUG FIX: Numbers on the unit lines are now visible when the lines are close to
+           the edge of the screen.
+* BUG FIX: Fixed a bug that caused lines going from the bottom right corner to
+           the upper left corner not to be drawn in some cases.
+
 Fri Aug 15, 2014 - 0.1.1
 ===========================
 * BUG FIX: Fixed a bug that caused lines going from the bottom left corner to

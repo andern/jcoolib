@@ -439,10 +439,15 @@ public class CCSystem extends JPanel {
          */
         Point2D p2d1;
         Point2D p2d2;
-        /* Special case, from bottom left corner to upper right corner */
+        /* Special case, from corner to corner */
         if (v_minX && v_maxX && v_minY && v_maxY) {
-            p2d1 = new Point2D.Double(minX, i_minX);
-            p2d2 = new Point2D.Double(i_maxY, maxY);
+            if (line.a < 0) {
+                p2d1 = new Point2D.Double(minX, minY);
+                p2d2 = new Point2D.Double(maxX, maxY);
+            } else {
+                p2d1 = new Point2D.Double(maxX, minY);
+                p2d2 = new Point2D.Double(minX, maxY);
+            }
         } else if (v_minX && v_minY) {
             p2d1 = new Point2D.Double(minX, i_minX);
             p2d2 = new Point2D.Double(i_minY, minY);
@@ -553,8 +558,8 @@ public class CCSystem extends JPanel {
         Point p = translate(p2d);
         
         int strValPixels = 7 * strval.length();
-        int offset = (minY >= 0) ? -10 : 20;
-        
+        int offset = (minY >= -translateY(40)) ? -10 : 20;
+
         g2d.drawLine(p.x, p.y-ulSize, p.x, p.y+ulSize);
         g2d.drawString(strval, p.x - strValPixels/2, p.y + offset);
     }
@@ -595,7 +600,7 @@ public class CCSystem extends JPanel {
         Point p = translate(p2d);
         
         int strValPixels = 7 * strval.length() + 7;
-        int offset = (minX >= 0) ? 5 : -strValPixels;
+        int offset = (minX >= -translateX(strValPixels*2)) ? 5 : -strValPixels;
         
         g2d.drawLine(p.x-ulSize, p.y, p.x+ulSize, p.y);
         g2d.drawString(strval, p.x+offset, p.y+5);
@@ -1183,7 +1188,15 @@ public class CCSystem extends JPanel {
     private int translateX(double x) {
         return (int) Math.round((x - minX) / xscale);
     }
-    
+
+    private double translateX(int x) {
+        return x * xscale + minX;
+    }
+
+    private double translateY(int y) {
+        return y * yscale + minY;
+    }
+
     
     
     /* 
